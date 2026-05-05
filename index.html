@@ -573,25 +573,26 @@ async function loadFromSheet() {
     const d = await sheetsReq('GET',`/values/${encodeURIComponent(SHEET_NAME)}!A1:P?majorDimension=ROWS`);
     const rows = d.values||[];
     if (rows.length < 1) { state.orders = []; } else {
-      // Map header names to column indices for robust loading
+      // Map header names to column indices - use exact match for critical fields
       const headers = rows[0].map(h => h.toLowerCase().trim());
-      const col = (name) => headers.findIndex(h => h.includes(name));
-      const cId    = col('id orden') >= 0 ? col('id orden') : 0;
-      const cDate  = col('fecha') >= 0 ? col('fecha') : 1;
-      const cFid   = col('fragancia id') >= 0 ? col('fragancia id') : 2;
-      const cFrag  = col('fragancia') >= 0 ? col('fragancia') : 3;
-      const cCasa  = col('casa') >= 0 ? col('casa') : 4;
-      const cSize  = col('tamaño') >= 0 ? col('tamaño') : 5;
-      const cQty   = col('cantidad') >= 0 ? col('cantidad') : 6;
-      const cMl    = col('ml total') >= 0 ? col('ml total') : 7;
-      const cRev   = col('ingreso') >= 0 ? col('ingreso') : 8;
-      const cShip  = col('envío') >= 0 ? col('envío') : 9;
-      const cOnum  = col('número') >= 0 ? col('número') : 10;
-      const cName  = col('nombre cliente') >= 0 ? col('nombre cliente') : 11;
-      const cEmail = col('email') >= 0 ? col('email') : 12;
-      const cPhone = col('teléfono') >= 0 ? col('teléfono') : 13;
-      const cAddr  = col('dirección') >= 0 ? col('dirección') : 14;
-      const cNotes = col('notas') >= 0 ? col('notas') : 15;
+      const colExact = (name) => headers.findIndex(h => h === name);
+      const colInc   = (name) => headers.findIndex(h => h.includes(name));
+      const cId    = colExact('id orden') >= 0 ? colExact('id orden') : 0;
+      const cDate  = colExact('fecha') >= 0 ? colExact('fecha') : 1;
+      const cFid   = colExact('fragancia id') >= 0 ? colExact('fragancia id') : 2;
+      const cFrag  = colExact('fragancia') >= 0 ? colExact('fragancia') : 3;
+      const cCasa  = colExact('casa') >= 0 ? colExact('casa') : 4;
+      const cSize  = colInc('tamaño') >= 0 ? colInc('tamaño') : 5;
+      const cQty   = colExact('cantidad') >= 0 ? colExact('cantidad') : 6;
+      const cMl    = colInc('ml total') >= 0 ? colInc('ml total') : 7;
+      const cRev   = colInc('ingreso') >= 0 ? colInc('ingreso') : 8;
+      const cShip  = colInc('envío') >= 0 ? colInc('envío') : 9;
+      const cOnum  = colInc('número') >= 0 ? colInc('número') : 10;
+      const cName  = colExact('nombre cliente') >= 0 ? colExact('nombre cliente') : 11;
+      const cEmail = colInc('email') >= 0 ? colInc('email') : 12;
+      const cPhone = colInc('teléfono') >= 0 ? colInc('teléfono') : 13;
+      const cAddr  = colInc('dirección') >= 0 ? colInc('dirección') : 14;
+      const cNotes = colExact('notas') >= 0 ? colExact('notas') : 15;
 
       state.orders = rows.slice(1).filter(r => r.length > 0 && r[cId]).map(r => ({
         order_id:     r[cId]||'',
@@ -627,8 +628,7 @@ async function loadFromSheet() {
 }
 
 async function appendRow(sheetName, row) {
-  const cols = String.fromCharCode(64 + row.length);
-  return sheetsReq('POST',`/values/${encodeURIComponent(sheetName)}!A:${cols}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{values:[row]});
+  return sheetsReq('POST',`/values/${encodeURIComponent(sheetName)}/values:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{values:[row]});
 }
 
 async function deleteRow(sheetName, order_id) {
