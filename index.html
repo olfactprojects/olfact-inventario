@@ -492,13 +492,19 @@ function loadGoogleScript() {
   });
 }
 
-async function signIn() {
+async function signIn(silent=false) {
   await loadGoogleScript();
   const client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID, scope: SCOPES,
+    prompt: silent ? 'none' : '',
     callback: async (resp) => {
-      if (resp.error) { setSyncState('error','Error de autenticación'); return; }
+      if (resp.error) {
+        if (silent) { setSyncState('','Inicia sesión para sincronizar'); return; }
+        setSyncState('error','Error de autenticación'); return;
+      }
       state.accessToken = resp.access_token;
+      // Store expiry time
+      sessionStorage.setItem('olfact_token_exp', Date.now() + 3500000);
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('btn-signout').style.display = 'inline-flex';
       document.getElementById('btn-sync').style.display = 'inline-flex';
@@ -509,8 +515,15 @@ async function signIn() {
       renderAll();
     },
   });
-  client.requestAccessToken();
+  if (silent) {
+    try { client.requestAccessToken({prompt:'none'}); } catch(e) { setSyncState('','Inicia sesión para sincronizar'); }
+  } else {
+    client.requestAccessToken();
+  }
 }
+
+// Auto-refresh token every 50 minutes
+setInterval(() => { if (state.accessToken) signIn(true); }, 50*60*1000);
 
 function signOut() {
   state.accessToken = null; state.orders = []; state.restocks = [];
@@ -541,6 +554,9 @@ async function ensureSheet(name, headers) {
   if (!exists) {
     await sheetsReq('POST',':batchUpdate',{requests:[{addSheet:{properties:{title:name}}}]});
     await sheetsReq('PUT',`/values/${encodeURIComponent(name)}!A1:${String.fromCharCode(64+headers.length)}1?valueInputOption=RAW`,{values:[headers]});
+  } else {
+    // Verify headers are correct - always overwrite row 1 to ensure correct structure
+    await sheetsReq('PUT',`/values/${encodeURIComponent(name)}!A1:${String.fromCharCode(64+headers.length)}1?valueInputOption=RAW`,{values:[headers]});
   }
 }
 
@@ -552,29 +568,62 @@ async function ensureSheetHeaders() {
 
 async function loadFromSheet() {
   setSyncState('syncing','Cargando datos...');
-  // Load orders
+  // Load orders - read header row first to map columns correctly
   try {
-    const d = await sheetsReq('GET',`/values/${encodeURIComponent(SHEET_NAME)}!A2:P?majorDimension=ROWS`);
-    state.orders = (d.values||[]).map(r => ({
-      order_id:     r[0]||'',  date:        r[1]||'',
-      fragrance_id: parseInt(r[2])||0,  fragrance:   r[3]||'',
-      casa:         r[4]||'',  size:        parseInt(r[5])||0,
-      qty:          parseInt(r[6])||1,  ml:          parseFloat(r[7])||0,
-      revenue:      parseFloat(r[8])||0,  shipping:    parseFloat(r[9])||0,
-      order_num:    r[10]||'', client_name: r[11]||'',
-      client_email: r[12]||'', client_phone:r[13]||'',
-      address:      r[14]||'', notes:       r[15]||'',
-    }));
-  } catch(e) { console.warn('Orders load error:', e); }
+    const d = await sheetsReq('GET',`/values/${encodeURIComponent(SHEET_NAME)}!A1:P?majorDimension=ROWS`);
+    const rows = d.values||[];
+    if (rows.length < 1) { state.orders = []; } else {
+      // Map header names to column indices for robust loading
+      const headers = rows[0].map(h => h.toLowerCase().trim());
+      const col = (name) => headers.findIndex(h => h.includes(name));
+      const cId    = col('id orden') >= 0 ? col('id orden') : 0;
+      const cDate  = col('fecha') >= 0 ? col('fecha') : 1;
+      const cFid   = col('fragancia id') >= 0 ? col('fragancia id') : 2;
+      const cFrag  = col('fragancia') >= 0 ? col('fragancia') : 3;
+      const cCasa  = col('casa') >= 0 ? col('casa') : 4;
+      const cSize  = col('tamaño') >= 0 ? col('tamaño') : 5;
+      const cQty   = col('cantidad') >= 0 ? col('cantidad') : 6;
+      const cMl    = col('ml total') >= 0 ? col('ml total') : 7;
+      const cRev   = col('ingreso') >= 0 ? col('ingreso') : 8;
+      const cShip  = col('envío') >= 0 ? col('envío') : 9;
+      const cOnum  = col('número') >= 0 ? col('número') : 10;
+      const cName  = col('nombre cliente') >= 0 ? col('nombre cliente') : 11;
+      const cEmail = col('email') >= 0 ? col('email') : 12;
+      const cPhone = col('teléfono') >= 0 ? col('teléfono') : 13;
+      const cAddr  = col('dirección') >= 0 ? col('dirección') : 14;
+      const cNotes = col('notas') >= 0 ? col('notas') : 15;
+
+      state.orders = rows.slice(1).filter(r => r.length > 0 && r[cId]).map(r => ({
+        order_id:     r[cId]||'',
+        date:         r[cDate]||'',
+        fragrance_id: parseInt(r[cFid])||0,
+        fragrance:    r[cFrag]||'',
+        casa:         r[cCasa]||'',
+        size:         parseInt(r[cSize])||0,
+        qty:          parseInt(r[cQty])||1,
+        ml:           parseFloat(r[cMl])||0,
+        revenue:      parseFloat(r[cRev])||0,
+        shipping:     parseFloat(r[cShip])||0,
+        order_num:    r[cOnum]||'',
+        client_name:  r[cName]||'',
+        client_email: r[cEmail]||'',
+        client_phone: r[cPhone]||'',
+        address:      r[cAddr]||'',
+        notes:        r[cNotes]||'',
+      }));
+    }
+    console.log('Orders loaded:', state.orders.length, 'fragrance_ids:', [...new Set(state.orders.map(o=>o.fragrance_id))]);
+  } catch(e) { console.warn('Orders load error:', e); state.orders = []; }
   // Load restocks
   try {
-    const d2 = await sheetsReq('GET',`/values/Reposiciones!A2:F?majorDimension=ROWS`);
-    state.restocks = (d2.values||[]).map(r => ({
+    const d2 = await sheetsReq('GET',`/values/Reposiciones!A1:F?majorDimension=ROWS`);
+    const rows2 = d2.values||[];
+    state.restocks = rows2.slice(1).filter(r=>r.length>0&&r[0]).map(r => ({
       id: r[0]||'', date: r[1]||'', fragrance_id: parseInt(r[2])||0,
       fragrance: r[3]||'', ml_added: parseFloat(r[4])||0, notes: r[5]||'',
     }));
-  } catch(e) { console.warn('Restocks load error:', e); }
-  setSyncState('ok',`Sincronizado · ${state.orders.length} órdenes, ${state.restocks.length} reposiciones`);
+  } catch(e) { console.warn('Restocks load error:', e); state.restocks = []; }
+  setSyncState('ok',`Sincronizado · ${state.orders.length} órdenes · ${state.restocks.length} reposiciones`);
 }
 
 async function appendRow(sheetName, row) {
@@ -1101,6 +1150,10 @@ rebuildProducts();
 renderAll();
 document.getElementById('tab-inventory').style.display='grid';
 ['tab-orders','tab-dashboard','tab-customers'].forEach(id=>document.getElementById(id).style.display='none');
+
+// Attempt silent sign-in on page load (works if user has active Google session)
+setSyncState('syncing', 'Verificando sesión...');
+setTimeout(() => signIn(true), 800);
 </script>
 </body>
 </html>
