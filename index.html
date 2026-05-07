@@ -786,22 +786,18 @@ function loadGoogleScript() {
   });
 }
 
-async function signIn(silent=false) {
+async function signIn() {
   await loadGoogleScript();
   const client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID, scope: SCOPES,
     callback: async (resp) => {
       if (resp.error) {
-        if (!silent) {
-          setSyncState('error','Error de autenticación');
-        } else {
-          // Silent failed - show login overlay so user can authenticate
-          setSyncState('','Inicia sesión para sincronizar');
-          document.getElementById('overlay').classList.remove('hidden');
-        }
+        setSyncState('error','Error de autenticación — intenta de nuevo');
         return;
       }
       state.accessToken = resp.access_token;
+      // Schedule token refresh before it expires (tokens last 1hr)
+      setTimeout(() => signIn(), 55*60*1000);
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('btn-signout').style.display='inline-flex';
       document.getElementById('btn-sync').style.display='inline-flex';
@@ -814,10 +810,8 @@ async function signIn(silent=false) {
       setTimeout(() => checkThresholdNotifications(true), 1500);
     },
   });
-  if (silent) { try { client.requestAccessToken({prompt:'none'}); } catch(e) { setSyncState('','Inicia sesión'); } }
-  else client.requestAccessToken();
+  client.requestAccessToken();
 }
-setInterval(() => { if (state.accessToken) signIn(true); }, 50*60*1000);
 
 function signOut() {
   state.accessToken=null; state.orders=[]; state.restocks=[]; state.fulfillment=[];
@@ -1835,7 +1829,7 @@ document.getElementById('btn-save-thresh').addEventListener('click',()=>{
   rebuildProducts(); renderList();
   toast('Umbrales actualizados','','success',3000);
 });
-document.getElementById('btn-google').addEventListener('click',()=>signIn(false));
+document.getElementById('btn-google').addEventListener('click',()=>signIn());
 document.getElementById('btn-signout').addEventListener('click',signOut);
 document.getElementById('btn-darkmode').addEventListener('click',toggleDark);
 document.getElementById('btn-new-order').addEventListener('click',()=>{
@@ -1844,6 +1838,7 @@ document.getElementById('btn-new-order').addEventListener('click',()=>{
   toast('Nueva orden','Selecciona las fragancias y agrégalas al carrito','info',4000);
 });
 document.getElementById('btn-sync').addEventListener('click',async()=>{
+  if (!state.accessToken) { document.getElementById('overlay').classList.remove('hidden'); return; }
   const btn=document.getElementById('btn-sync');
   btn.classList.add('spinning'); btn.disabled=true;
   setSyncState('syncing','Sincronizando...');
@@ -1867,15 +1862,8 @@ rebuildProducts(); renderAll();
 ['tab-fulfill','tab-orders','tab-dashboard','tab-customers','tab-settings'].forEach(id=>document.getElementById(id).style.display='none');
 document.getElementById('tab-inventory').style.display='grid';
 
-setSyncState('syncing','Verificando sesión...');
-// If silent sign-in doesn't complete in 4 seconds, show login overlay
-const silentTimeout = setTimeout(() => {
-  if (!state.accessToken) {
-    setSyncState('', 'Inicia sesión para sincronizar');
-    document.getElementById('overlay').classList.remove('hidden');
-  }
-}, 4000);
-setTimeout(() => signIn(true), 800);
+setSyncState('', 'Inicia sesión para sincronizar');
+document.getElementById('overlay').classList.remove('hidden');
 </script>
 </body>
 </html>
