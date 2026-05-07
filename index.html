@@ -791,7 +791,16 @@ async function signIn(silent=false) {
   const client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID, scope: SCOPES,
     callback: async (resp) => {
-      if (resp.error) { if(!silent) setSyncState('error','Error de autenticación'); else setSyncState('','Inicia sesión'); return; }
+      if (resp.error) {
+        if (!silent) {
+          setSyncState('error','Error de autenticación');
+        } else {
+          // Silent failed - show login overlay so user can authenticate
+          setSyncState('','Inicia sesión para sincronizar');
+          document.getElementById('overlay').classList.remove('hidden');
+        }
+        return;
+      }
       state.accessToken = resp.access_token;
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('btn-signout').style.display='inline-flex';
@@ -823,12 +832,26 @@ function signOut() {
 // SHEETS API
 // ═══════════════════════════════════════
 async function sheetsReq(method, endpoint, body) {
+  if (!state.accessToken) {
+    // No token - force visible login
+    document.getElementById('overlay').classList.remove('hidden');
+    throw new Error('No hay sesión activa. Por favor inicia sesión.');
+  }
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}${endpoint}`;
   const res = await fetch(url, {
     method,
     headers: {'Authorization':`Bearer ${state.accessToken}`,'Content-Type':'application/json'},
     body: body ? JSON.stringify(body) : undefined,
   });
+  if (res.status === 401) {
+    // Token expired - clear and force re-login
+    state.accessToken = null;
+    document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('btn-signout').style.display = 'none';
+    document.getElementById('btn-sync').style.display = 'none';
+    setSyncState('error', 'Sesión expirada — inicia sesión nuevamente');
+    throw new Error('Sesión expirada');
+  }
   if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message||'Sheets error'); }
   return res.json();
 }
@@ -1845,7 +1868,14 @@ rebuildProducts(); renderAll();
 document.getElementById('tab-inventory').style.display='grid';
 
 setSyncState('syncing','Verificando sesión...');
-setTimeout(()=>signIn(true),800);
+// If silent sign-in doesn't complete in 4 seconds, show login overlay
+const silentTimeout = setTimeout(() => {
+  if (!state.accessToken) {
+    setSyncState('', 'Inicia sesión para sincronizar');
+    document.getElementById('overlay').classList.remove('hidden');
+  }
+}, 4000);
+setTimeout(() => signIn(true), 800);
 </script>
 </body>
 </html>
