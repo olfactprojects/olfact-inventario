@@ -620,7 +620,8 @@ async function loadFromSheet() {
 }
 
 async function appendRow(sheetName, row) {
-  return sheetsReq('POST',`/values/${encodeURIComponent(sheetName)}/values:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{values:[row]});
+  const cols = String.fromCharCode(64 + row.length);
+  return sheetsReq('POST',`/values/${encodeURIComponent(sheetName)}!A:${cols}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{values:[row]});
 }
 
 async function deleteRow(sheetName, order_id) {
