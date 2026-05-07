@@ -790,14 +790,13 @@ async function signIn() {
   await loadGoogleScript();
   const client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID, scope: SCOPES,
+    prompt: 'select_account',
     callback: async (resp) => {
       if (resp.error) {
         setSyncState('error','Error de autenticación — intenta de nuevo');
         return;
       }
       state.accessToken = resp.access_token;
-      // Schedule token refresh before it expires (tokens last 1hr)
-      setTimeout(() => signIn(), 55*60*1000);
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('btn-signout').style.display='inline-flex';
       document.getElementById('btn-sync').style.display='inline-flex';
