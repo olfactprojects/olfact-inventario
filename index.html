@@ -492,19 +492,16 @@ function loadGoogleScript() {
   });
 }
 
-async function signIn(silent=false) {
+async function signIn() {
   await loadGoogleScript();
   const client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID, scope: SCOPES,
-    prompt: silent ? 'none' : '',
     callback: async (resp) => {
       if (resp.error) {
-        if (silent) { setSyncState('','Inicia sesión para sincronizar'); return; }
-        setSyncState('error','Error de autenticación'); return;
+        setSyncState('error','Error de autenticación — intenta de nuevo');
+        return;
       }
       state.accessToken = resp.access_token;
-      // Store expiry time
-      sessionStorage.setItem('olfact_token_exp', Date.now() + 3500000);
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('btn-signout').style.display = 'inline-flex';
       document.getElementById('btn-sync').style.display = 'inline-flex';
@@ -515,15 +512,11 @@ async function signIn(silent=false) {
       renderAll();
     },
   });
-  if (silent) {
-    try { client.requestAccessToken({prompt:'none'}); } catch(e) { setSyncState('','Inicia sesión para sincronizar'); }
-  } else {
-    client.requestAccessToken();
-  }
+  client.requestAccessToken();
 }
 
 // Auto-refresh token every 50 minutes
-setInterval(() => { if (state.accessToken) signIn(true); }, 50*60*1000);
+// Token refresh removed - handled by manual re-login
 
 function signOut() {
   state.accessToken = null; state.orders = []; state.restocks = [];
@@ -1128,7 +1121,7 @@ document.querySelectorAll('[data-stock]').forEach(btn=>btn.addEventListener('cli
 document.getElementById('search').addEventListener('input',e=>{state.search=e.target.value;renderList()});
 
 // Sync & Auth buttons
-document.getElementById('btn-google').addEventListener('click',signIn);
+document.getElementById('btn-google').addEventListener('click',()=>signIn());
 document.getElementById('btn-signout').addEventListener('click',signOut);
 document.getElementById('btn-sync').addEventListener('click',async()=>{
   const btn=document.getElementById('btn-sync');
@@ -1150,9 +1143,7 @@ renderAll();
 document.getElementById('tab-inventory').style.display='grid';
 ['tab-orders','tab-dashboard','tab-customers'].forEach(id=>document.getElementById(id).style.display='none');
 
-// Attempt silent sign-in on page load (works if user has active Google session)
-setSyncState('syncing', 'Verificando sesión...');
-setTimeout(() => signIn(true), 800);
+setSyncState('', 'Inicia sesión para sincronizar');
 </script>
 </body>
 </html>
