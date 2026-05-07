@@ -38,15 +38,84 @@
   --bg:         #182241;
   --white:      #213C4E;
   --border:     rgba(255,245,217,0.08);
-  --border-mid: rgba(255,245,217,0.15);
-  --text:       #F5F7FA;
-  --muted:      #7B949C;
+  --border-mid: rgba(255,245,217,0.18);
+  --text:       #FFF5D9;
+  --muted:      #9BB0B8;
   --slate:      #7B949C;
   --slate-deep: #9BB0B8;
-  --stock-ok-bg:   rgba(45,122,82,0.15);
-  --stock-low-bg:  rgba(184,134,11,0.15);
-  --stock-crit-bg: rgba(192,57,43,0.15);
+  --navy:       #FFF5D9;
+  --green:      #4caf7d;
+  --amber:      #e6a817;
+  --red:        #e05c5c;
+  --stock-ok-bg:   rgba(76,175,125,0.12);
+  --stock-low-bg:  rgba(230,168,23,0.12);
+  --stock-crit-bg: rgba(224,92,92,0.12);
 }
+/* Dark mode specific overrides */
+[data-theme="dark"] header { background: #182241; border-bottom-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .logo-icon { background: rgba(255,245,217,0.15); }
+[data-theme="dark"] .logo-icon svg path { stroke: var(--cream); }
+[data-theme="dark"] .tabs { background: #213C4E; border-bottom-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .tab-btn { color: #9BB0B8; }
+[data-theme="dark"] .tab-btn.active { color: var(--cream); border-bottom-color: var(--cream); }
+[data-theme="dark"] .sidebar { background: #213C4E; border-right-color: rgba(255,245,217,0.1); }
+[data-theme="dark"] .sb-section { border-bottom-color: rgba(255,245,217,0.08); }
+[data-theme="dark"] .search-input { background: #182241; color: var(--cream); border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .search-input::placeholder { color: #7B949C; }
+[data-theme="dark"] .pitem { background: #213C4E; border-bottom-color: rgba(255,245,217,0.08); }
+[data-theme="dark"] .pitem:hover { background: rgba(255,245,217,0.05); }
+[data-theme="dark"] .pitem.active { background: rgba(255,245,217,0.08); border-left-color: var(--cream); }
+[data-theme="dark"] .pitem-name { color: var(--cream); }
+[data-theme="dark"] .main { background: #182241; }
+[data-theme="dark"] .card { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .big-num { color: var(--cream); }
+[data-theme="dark"] .size-card { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .size-price { color: var(--cream); }
+[data-theme="dark"] .form-card { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .finput, [data-theme="dark"] .fselect { background: #182241; color: var(--cream); border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .table-wrap { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] td { color: var(--cream); border-bottom-color: rgba(255,245,217,0.08); }
+[data-theme="dark"] th { color: #9BB0B8; }
+[data-theme="dark"] tr:hover td { background: rgba(255,245,217,0.03); }
+[data-theme="dark"] .sync-bar { background: #213C4E; border-bottom-color: rgba(255,245,217,0.08); }
+[data-theme="dark"] .detail-name { color: var(--cream); }
+[data-theme="dark"] .cat-badge { border-color: rgba(255,245,217,0.25); color: #9BB0B8; }
+[data-theme="dark"] .pill { color: #9BB0B8; border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .pill.active { background: var(--cream); color: #182241; border-color: var(--cream); }
+[data-theme="dark"] .dash-card { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .dash-full { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .top-name { color: var(--cream); }
+[data-theme="dark"] .cust-card { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .cust-name { color: var(--cream); }
+[data-theme="dark"] .fulfill-group { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .fulfill-order-num { color: var(--cream); }
+[data-theme="dark"] .status-select { background: #182241; color: var(--cream); }
+[data-theme="dark"] .tracking-input { background: #182241; color: var(--cream); border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .settings-section { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .settings-title { color: var(--cream); }
+[data-theme="dark"] .margin-name { color: var(--cream); }
+[data-theme="dark"] .margin-input { background: #182241; color: var(--cream); border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .ostat { background: #213C4E; border-color: rgba(255,245,217,0.12); }
+[data-theme="dark"] .ostat-val { color: var(--cream); }
+[data-theme="dark"] .signin-card { background: #213C4E; border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .signin-wordmark { color: var(--cream); }
+[data-theme="dark"] .signin-logo-icon { background: rgba(255,245,217,0.15); }
+[data-theme="dark"] .btn-google { background: var(--cream); color: #182241; }
+[data-theme="dark"] .toast { background: #213C4E; border-color: rgba(255,245,217,0.15); color: var(--cream); }
+[data-theme="dark"] .cmd-box { background: #213C4E; border-color: rgba(255,245,217,0.15); }
+[data-theme="dark"] .cmd-input { color: var(--cream); }
+[data-theme="dark"] .cmd-result:hover, [data-theme="dark"] .cmd-result.selected { background: rgba(255,245,217,0.05); }
+[data-theme="dark"] .cmd-result-name { color: var(--cream); }
+[data-theme="dark"] .hstat-val { color: var(--cream); }
+[data-theme="dark"] .bar-wrap { background: rgba(255,245,217,0.08); }
+[data-theme="dark"] .mini-bar-wrap { background: rgba(255,245,217,0.08); }
+[data-theme="dark"] .mini-bar { background: var(--cream); }
+[data-theme="dark"] .cart-item { background: rgba(255,245,217,0.05); }
+[data-theme="dark"] .velocity-val { color: var(--cream); }
+[data-theme="dark"] .detail-code { color: #9BB0B8; }
+[data-theme="dark"] .fulfill-client { color: #9BB0B8; }
+[data-theme="dark"] .fulfill-body { background: rgba(255,245,217,0.02); }
+[data-theme="dark"] .date-input { background: #213C4E; color: var(--cream); border-color: rgba(255,245,217,0.15); }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;transition:background 0.3s,color 0.3s}
 
@@ -374,6 +443,25 @@ tr:hover td{background:rgba(33,60,78,0.02)}
 .btn-google{width:100%;padding:12px;background:var(--navy);color:var(--cream);border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.08em;cursor:pointer;transition:opacity 0.15s;display:flex;align-items:center;justify-content:center;gap:10px}
 .btn-google:hover{opacity:0.88}
 .signin-note{font-family:'Raleway',sans-serif;font-size:10px;color:var(--slate);margin-top:12px;font-style:italic}
+
+/* ── CUSTOMER MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(33,60,78,0.6);z-index:700;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-overlay.hidden{display:none}
+.modal-box{background:var(--white);border:1px solid var(--border-mid);border-radius:14px;width:90%;max-width:680px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(33,60,78,0.2)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border-mid);position:sticky;top:0;background:var(--white);z-index:10}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text)}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:0 4px;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px}
+.modal-section{margin-bottom:20px}
+.modal-section-title{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--slate);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.info-item label{font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:3px}
+.info-item span{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text);font-weight:500}
+[data-theme="dark"] .modal-box{background:#213C4E;border-color:rgba(255,245,217,0.15)}
+[data-theme="dark"] .modal-header{background:#213C4E;border-bottom-color:rgba(255,245,217,0.1)}
+[data-theme="dark"] .modal-title{color:var(--cream)}
+[data-theme="dark"] .info-item span{color:var(--cream)}
 </style>
 </head>
 <body>
@@ -548,8 +636,8 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>Fecha</th><th>Orden #</th><th>Cliente</th><th>Fragancia</th>
-          <th>Tam.</th><th>Qty</th><th>ml</th><th>Ingreso</th><th>Envío</th><th></th>
+          <th>Orden #</th><th>Fecha</th><th>Cliente</th><th>Fragancia</th>
+          <th>Ingreso</th><th>Estado</th>
         </tr></thead>
         <tbody id="ot-tbody"></tbody>
       </table>
@@ -1373,15 +1461,21 @@ function renderDetail() {
     btn.addEventListener('click',async()=>{
       if(!confirm('¿Deshacer esta orden?')) return;
       const oid=btn.dataset.oid;
+      const order=state.orders.find(o=>o.order_id===oid);
       setSyncState('syncing','Eliminando...');
       try {
         await deleteSheetRow(SHEETS.ORDERS,oid);
         state.orders=state.orders.filter(o=>o.order_id!==oid);
+        if(order&&order.order_num){
+          const remaining=state.orders.filter(o=>o.order_num===order.order_num);
+          if(remaining.length===0){try{await deleteSheetRow(SHEETS.FULFILL,order.order_num);state.fulfillment=state.fulfillment.filter(f=>f.order_num!==order.order_num);}catch(e){}}
+        }
         rebuildProducts(); renderAll();
         toast('Orden eliminada','','success',3000);
         setSyncState('ok',`Eliminado · ${new Date().toLocaleTimeString('es-MX')}`);
-      } catch(e){ setSyncState('error','Error: '+e.message); }
+      } catch(e){setSyncState('error','Error: '+e.message);}
     });
+  });
   });
 }
 
@@ -1513,27 +1607,101 @@ function renderOrdersTab() {
   document.getElementById('ot-ml').textContent=orders.reduce((s,o)=>s+o.ml,0).toFixed(1)+'ml';
   document.getElementById('ot-ship').textContent=fmt(orders.reduce((s,o)=>s+(o.shipping||0),0));
   const tbody=document.getElementById('ot-tbody');
-  if(!orders.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted);font-style:italic">Sin órdenes</td></tr>`;return;}
-  tbody.innerHTML=orders.map(o=>`<tr>
-    <td class="td-muted">${o.date}</td>
-    <td style="font-weight:600">${o.order_num||'—'}</td>
-    <td>${o.client_name||'—'}</td>
-    <td>${o.fragrance||'—'}<br><span class="td-muted" style="font-size:10px">${o.codigo||''}</span></td>
-    <td><span class="badge badge-navy">${o.size}ml</span></td>
-    <td>${o.qty||1}</td>
-    <td class="td-muted">-${o.ml}ml</td>
-    <td class="td-green">${fmt(o.revenue)}</td>
-    <td class="td-muted">${o.shipping?fmt(o.shipping):'—'}</td>
-    <td><button class="btn-undo" onclick="undoOrder('${o.order_id}')">↩</button></td>
-  </tr>`).join('');
+  if(!orders.length){tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-style:italic">Sin órdenes</td></tr>`;return;}
+
+  // Group by order_num
+  const groups={};
+  orders.forEach(o=>{
+    const key=o.order_num||o.order_id;
+    if(!groups[key]) groups[key]={order_num:key,date:o.date,client:o.client_name||'—',items:[],total:0,shipping:o.shipping||0,status:'—'};
+    groups[key].items.push(o);
+    groups[key].total+=o.revenue;
+  });
+  // Get fulfillment status
+  Object.values(groups).forEach(g=>{
+    const f=state.fulfillment.find(f=>f.order_num===g.order_num);
+    if(f) g.status=f.status||'pendiente';
+  });
+
+  const statusBadge={pendiente:'badge-amber',preparando:'badge-blue',enviado:'badge-green',entregado:'badge-navy','—':'badge-navy'};
+
+  tbody.innerHTML=Object.values(groups).map(g=>{
+    const isMulti=g.items.length>1;
+    const groupId='grp-'+g.order_num.replace(/[^a-z0-9]/gi,'');
+    return `
+    <tr class="order-group-row" style="cursor:${isMulti?'pointer':'default'}" onclick="${isMulti?`toggleOrderGroup('${groupId}')`:''}">
+      <td style="font-weight:600">
+        ${isMulti?`<span id="arrow-${groupId}" style="margin-right:6px;display:inline-block;transition:transform 0.2s">▶</span>`:''}
+        ${g.order_num}
+      </td>
+      <td class="td-muted">${g.date}</td>
+      <td>${g.client}</td>
+      <td>
+        ${isMulti
+          ? `<span class="badge badge-navy">${g.items.length} fragancias</span>`
+          : `${g.items[0].fragrance}<br><span class="td-muted" style="font-size:10px">${g.items[0].codigo||''}</span>`
+        }
+      </td>
+      <td class="td-green" style="font-weight:600">${fmt(g.total)}</td>
+      <td>
+        <span class="badge ${statusBadge[g.status]||'badge-navy'}">${g.status}</span>
+        ${isMulti?'':`<button class="btn-undo" style="margin-left:6px" onclick="event.stopPropagation();undoOrder('${g.items[0].order_id}')">↩</button>`}
+      </td>
+    </tr>
+    ${isMulti?`
+    <tr id="${groupId}" style="display:none">
+      <td colspan="6" style="padding:0">
+        <table style="width:100%;border-collapse:collapse;background:var(--bg)">
+          <thead><tr style="background:var(--bg)">
+            <th style="padding:8px 16px 8px 40px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);text-align:left">Fragancia</th>
+            <th style="padding:8px 12px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);text-align:left">Código</th>
+            <th style="padding:8px 12px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);text-align:left">Tamaño</th>
+            <th style="padding:8px 12px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);text-align:left">Qty</th>
+            <th style="padding:8px 12px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--slate);text-align:left">Ingreso</th>
+            <th style="padding:8px 12px"></th>
+          </tr></thead>
+          <tbody>
+          ${g.items.map(o=>`<tr style="border-top:1px solid var(--border)">
+            <td style="padding:8px 12px 8px 40px;font-size:12px;color:var(--text)">${o.fragrance}</td>
+            <td style="padding:8px 12px;font-size:10px;color:var(--muted)">${o.codigo||'—'}</td>
+            <td style="padding:8px 12px"><span class="badge badge-navy">${o.size}ml × ${o.qty||1}</span></td>
+            <td style="padding:8px 12px;font-size:12px;color:var(--muted)">-${o.ml}ml</td>
+            <td style="padding:8px 12px;font-size:12px;color:var(--green);font-weight:600">${fmt(o.revenue)}</td>
+            <td style="padding:8px 12px"><button class="btn-undo" onclick="undoOrder('${o.order_id}')">↩</button></td>
+          </tr>`).join('')}
+          </tbody>
+        </table>
+      </td>
+    </tr>`:''}`;
+  }).join('');
+}
+
+function toggleOrderGroup(id) {
+  const row=document.getElementById(id);
+  const arrow=document.getElementById('arrow-'+id);
+  if(!row) return;
+  const isOpen=row.style.display!=='none';
+  row.style.display=isOpen?'none':'table-row';
+  if(arrow) arrow.style.transform=isOpen?'rotate(0deg)':'rotate(90deg)';
 }
 
 async function undoOrder(oid) {
   if(!confirm('¿Deshacer esta orden?')) return;
+  const order = state.orders.find(o => o.order_id === oid);
   setSyncState('syncing','Eliminando...');
   try {
-    await deleteSheetRow(SHEETS.ORDERS,oid);
-    state.orders=state.orders.filter(o=>o.order_id!==oid);
+    await deleteSheetRow(SHEETS.ORDERS, oid);
+    state.orders = state.orders.filter(o => o.order_id !== oid);
+    // Delete fulfillment if no more orders with same order_num
+    if (order && order.order_num) {
+      const remaining = state.orders.filter(o => o.order_num === order.order_num);
+      if (remaining.length === 0) {
+        try {
+          await deleteSheetRow(SHEETS.FULFILL, order.order_num);
+          state.fulfillment = state.fulfillment.filter(f => f.order_num !== order.order_num);
+        } catch(e) { console.warn('Fulfillment delete:', e); }
+      }
+    }
     rebuildProducts(); renderAll(); renderOrdersTab();
     toast('Orden eliminada','','success',3000);
     setSyncState('ok',`Eliminado · ${new Date().toLocaleTimeString('es-MX')}`);
@@ -1651,6 +1819,7 @@ function renderCustomers() {
       </div>
       ${topFrags?`<div class="cust-favs" style="margin-top:8px">Favoritos: ${topFrags}</div>`:''}
       <div class="cust-last">Última compra: ${lastOrder?.date||'—'} · ${orderNums.length} pedido(s)</div>
+      <button onclick="openCustomerModal('${key}')" style="margin-top:10px;width:100%;padding:7px;background:transparent;border:1px solid var(--border-mid);border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--navy)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border-mid)';this.style.color='var(--muted)'">Ver perfil completo →</button>
     </div>`;
   }).join('');
 }
@@ -1852,6 +2021,85 @@ document.getElementById('btn-sync').addEventListener('click',async()=>{
 });
 
 // ═══════════════════════════════════════
+// CUSTOMER MODAL
+// ═══════════════════════════════════════
+function openCustomerModal(key) {
+  const custMap={};
+  state.orders.forEach(o=>{
+    if(!o.client_name&&!o.client_email) return;
+    const k=o.client_email||o.client_name;
+    if(!custMap[k]) custMap[k]={name:o.client_name||'—',email:o.client_email||'',phone:o.client_phone||'',address:o.address||'',orders:[]};
+    custMap[k].orders.push(o);
+    if(o.address&&o.address!==custMap[k].address) custMap[k].address=o.address;
+    if(o.client_phone&&o.client_phone!==custMap[k].phone) custMap[k].phone=o.client_phone;
+  });
+  const c=custMap[key];
+  if(!c) return;
+  const totalRev=c.orders.reduce((s,o)=>s+o.revenue,0);
+  const totalMl=c.orders.reduce((s,o)=>s+o.ml,0);
+  // Group orders by order_num
+  const groups={};
+  c.orders.forEach(o=>{
+    const k=o.order_num||o.order_id;
+    if(!groups[k]) groups[k]={order_num:k,date:o.date,items:[],total:0};
+    groups[k].items.push(o);
+    groups[k].total+=o.revenue;
+  });
+
+  document.getElementById('modal-cust-name').textContent=c.name;
+  document.getElementById('modal-cust-body').innerHTML=`
+    <div class="modal-section">
+      <div class="modal-section-title">Información de contacto</div>
+      <div class="info-grid">
+        <div class="info-item"><label>Email</label><span>${c.email||'—'}</span></div>
+        <div class="info-item"><label>Teléfono</label><span>${c.phone||'—'}</span></div>
+        <div class="info-item" style="grid-column:1/-1"><label>Dirección más reciente</label><span>${c.address||'—'}</span></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Resumen</div>
+      <div class="info-grid">
+        <div class="info-item"><label>Total órdenes</label><span>${c.orders.length} ítems · ${Object.keys(groups).length} pedido(s)</span></div>
+        <div class="info-item"><label>Total gastado</label><span style="color:var(--green)">${fmt(totalRev)}</span></div>
+        <div class="info-item"><label>ml comprados</label><span>${totalMl.toFixed(1)}ml</span></div>
+        <div class="info-item"><label>Primera compra</label><span>${[...c.orders].sort((a,b)=>a.date.localeCompare(b.date))[0]?.date||'—'}</span></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Historial de pedidos</div>
+      ${Object.values(groups).sort((a,b)=>b.date.localeCompare(a.date)).map(g=>{
+        const f=state.fulfillment.find(f=>f.order_num===g.order_num);
+        const status=f?.status||'pendiente';
+        const statusBadge={pendiente:'badge-amber',preparando:'badge-blue',enviado:'badge-green',entregado:'badge-navy'};
+        return `<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div>
+              <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text)">${g.order_num}</span>
+              <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted);margin-left:8px">${g.date}</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="badge ${statusBadge[status]||'badge-navy'}">${status}</span>
+              <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--green)">${fmt(g.total)}</span>
+            </div>
+          </div>
+          ${g.items.map(o=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid var(--border);font-family:'Space Grotesk',sans-serif;font-size:12px">
+            <span style="color:var(--text)">${o.fragrance}</span>
+            <span style="color:var(--muted)">${o.size}ml × ${o.qty||1} · ${fmt(o.revenue)}</span>
+          </div>`).join('')}
+          ${f?.tracking?`<div style="margin-top:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--blue)">📦 Guía: ${f.tracking}</div>`:''}
+          ${g.items[0]?.address?`<div style="margin-top:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)">📍 ${g.items[0].address}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  document.getElementById('cust-modal').classList.remove('hidden');
+}
+// Close modal on overlay click
+document.getElementById('cust-modal').addEventListener('click', e => {
+  if(e.target===document.getElementById('cust-modal')) document.getElementById('cust-modal').classList.add('hidden');
+});
+
+// ═══════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════
 // Restore dark mode preference
@@ -1865,5 +2113,16 @@ document.getElementById('tab-inventory').style.display='grid';
 setSyncState('', 'Inicia sesión para sincronizar');
 document.getElementById('overlay').classList.remove('hidden');
 </script>
+
+<!-- CUSTOMER MODAL -->
+<div class="modal-overlay hidden" id="cust-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-cust-name">Cliente</div>
+      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-cust-body"></div>
+  </div>
+</div>
 </body>
 </html>
