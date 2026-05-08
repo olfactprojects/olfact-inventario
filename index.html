@@ -557,6 +557,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
   <button class="tab-btn" data-tab="customers">👤 Clientes</button>
   <button class="tab-btn" data-tab="settings">⚙️ Ajustes</button>
+  <button class="tab-btn" data-tab="layers">🎵 Layers</button>
 </div>
 
 <!-- TAB: INVENTORY -->
@@ -733,6 +734,109 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   </div>
 </div>
 
+
+
+<!-- CUSTOMER MODAL -->
+<div class="modal-overlay hidden" id="cust-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-cust-name">Cliente</div>
+      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-cust-body"></div>
+  </div>
+</div>
+
+<!-- TAB: LAYERS -->
+<div id="tab-layers" style="display:none">
+  <div style="padding:24px 32px;max-width:900px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Layers Armónicos</div>
+        <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:3px">Combinaciones de fragancias curadas — el primer servicio de Layering en México</div>
+      </div>
+      <button class="btn-primary" onclick="showCreateLayer()">+ Crear Layer</button>
+    </div>
+
+    <!-- Create Layer Form (hidden by default) -->
+    <div id="layer-form-wrap" style="display:none;margin-bottom:20px">
+      <div class="form-card">
+        <div class="form-divider">Nueva combinación de Layer</div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+          <div class="fg"><label>Nombre del Layer</label><input class="finput" id="ly-name" placeholder="ej. Desert Sunrise"></div>
+          <div class="fg"><label>Precio del Bundle (MXN)</label><input class="finput" type="number" id="ly-price" placeholder="0" min="0"></div>
+        </div>
+        <div class="fg" style="margin-bottom:10px"><label>Descripción — Por qué funcionan juntos</label><input class="finput" id="ly-desc" placeholder="Descripción de la armonía entre las fragancias..."></div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+          <div class="fg"><label>Ocasión recomendada</label><input class="finput" id="ly-occasion" placeholder="ej. Noche de verano, Cita romántica..."></div>
+          <div class="fg"><label>Clima / Temporada</label><input class="finput" id="ly-climate" placeholder="ej. Caluroso y húmedo, Primavera..."></div>
+        </div>
+        <div class="form-divider">Fragancias del Layer</div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 0.6fr;margin-bottom:8px">
+          <div class="fg"><label>Fragancia 1</label>
+            <select class="fselect" id="ly-frag1"><option value="">Seleccionar...</option>
+              ${CATALOG.map(p=>`<option value="${p.id}">${p.nombre} (${p.casa})</option>`).join('')}
+            </select>
+          </div>
+          <div class="fg"><label>Tamaño</label>
+            <select class="fselect" id="ly-size1">
+              <option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option>
+            </select>
+          </div>
+          <div></div>
+        </div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 0.6fr;margin-bottom:12px">
+          <div class="fg"><label>Fragancia 2</label>
+            <select class="fselect" id="ly-frag2"><option value="">Seleccionar...</option>
+              ${CATALOG.map(p=>`<option value="${p.id}">${p.nombre} (${p.casa})</option>`).join('')}
+            </select>
+          </div>
+          <div class="fg"><label>Tamaño</label>
+            <select class="fselect" id="ly-size2">
+              <option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option>
+            </select>
+          </div>
+          <div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="saveLayer()">Guardar Layer</button>
+          <button class="btn-secondary" onclick="document.getElementById('layer-form-wrap').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layers List -->
+    <div id="layers-list"></div>
+  </div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div class="modal-overlay hidden" id="layer-order-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="layer-modal-title">Vender Layer</div>
+      <button class="modal-close" onclick="document.getElementById('layer-order-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="layer-modal-summary" style="margin-bottom:16px"></div>
+      <div class="form-divider">Datos de la orden</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg"><label>Orden #</label><input class="finput" id="lom-ordernum" placeholder="MP-001"></div>
+        <div class="fg"><label>Fecha</label><input class="finput" type="date" id="lom-date"></div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg"><label>Nombre cliente</label><input class="finput" id="lom-name" placeholder="Nombre completo"></div>
+        <div class="fg"><label>Email</label><input class="finput" type="email" id="lom-email" placeholder="cliente@email.com"></div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+        <div class="fg"><label>Teléfono</label><input class="finput" id="lom-phone" placeholder="+52 33..."></div>
+        <div class="fg"><label>Envío $</label><input class="finput" type="number" id="lom-shipping" placeholder="0"></div>
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label>Dirección</label><input class="finput" id="lom-address" placeholder="Calle, Colonia, Ciudad, CP"></div>
+      <button class="btn-primary" id="lom-btn" onclick="registerLayerOrder()">Registrar Orden de Layer</button>
+    </div>
+  </div>
+</div>
 <script>
 // ═══════════════════════════════════════
 // CONFIG
@@ -1266,10 +1370,11 @@ function renderDetail() {
       <div class="form-divider">Agregar esta fragancia a la orden</div>
       <div class="form-row" style="grid-template-columns:1fr 1fr 0.6fr auto;margin-bottom:8px">
         <div class="fg"><label>Tamaño</label>
-          <select class="fselect" id="f-size">
+          <select class="fselect" id="f-size" onchange="updateFullBottlePrice(${p.ml_disponibles},${p.costo_ml||0})">
             <option value="2" ${!can2?'disabled':''}>2ml — ${fmt(p.p2ml)}</option>
             <option value="5" ${!can5?'disabled':''}>5ml — ${fmt(p.p5ml)}</option>
             <option value="10" ${!can10?'disabled':''}>10ml — ${fmt(p.p10ml)}</option>
+            <option value="full">Botella completa (${p.ml_inicial.toFixed(0)}ml)</option>
           </select>
         </div>
         <div class="fg"><label>Cantidad</label><input class="finput" type="number" id="f-qty" value="1" min="1" max="50"></div>
@@ -1304,7 +1409,27 @@ function renderDetail() {
       </div>
     </div>
 
-    <!-- RESTOCK -->
+    <!-- AJUSTE MANUAL DE STOCK -->
+    <div class="sec-label">Ajustar stock</div>
+    <div class="form-card" style="margin-bottom:12px">
+      <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:11px;color:var(--muted);margin-bottom:10px">Restar ml por merma, pruebas, botella completa vendida, etc.</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr 1fr auto;margin-bottom:0">
+        <div class="fg"><label>ml a restar</label><input class="finput" type="number" id="adj-ml" placeholder="ej. 10" min="0.1" step="0.1"></div>
+        <div class="fg"><label>Motivo</label>
+          <select class="fselect" id="adj-reason">
+            <option value="Merma">Merma</option>
+            <option value="Prueba personal">Prueba personal</option>
+            <option value="Botella completa vendida">Botella completa vendida</option>
+            <option value="Error de decantado">Error de decantado</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="fg"><label>Notas</label><input class="finput" id="adj-notes" placeholder="Descripción..."></div>
+        <button class="btn-danger" id="btn-adjust" style="align-self:end">− Ajustar</button>
+      </div>
+    </div>
+
+    <!-- REPONER STOCK -->
     <div class="sec-label">Reponer stock</div>
     <div class="form-card">
       <div class="form-row" style="grid-template-columns:1fr 1fr 1fr auto">
@@ -1344,9 +1469,21 @@ function renderDetail() {
     </div>
   `;
 
+  // Full bottle price helper
+  window.updateFullBottlePrice = function(mlDisp, costoMl) {
+    const sel = document.getElementById('f-size');
+    if(!sel) return;
+    // Already shown in option text via template
+  };
+
   // Add to cart
   document.getElementById('btn-add-cart').addEventListener('click',()=>{
-    const size=parseInt(document.getElementById('f-size').value);
+    const sizeVal = document.getElementById('f-size').value;
+    if(sizeVal === 'full') {
+      toast('Botella completa','Usa "Registrar Orden" directamente para ventas de botella completa','info',4000);
+      return;
+    }
+    const size=parseInt(sizeVal);
     const qty=parseInt(document.getElementById('f-qty').value)||1;
     const ml=size*qty;
     if(p.ml_disponibles<ml){alert(`Stock insuficiente. Disponible: ${p.ml_disponibles.toFixed(1)}ml`);return;}
@@ -1366,22 +1503,29 @@ function renderDetail() {
 
   // Register order
   document.getElementById('btn-reg').addEventListener('click',async()=>{
-    const size=parseInt(document.getElementById('f-size').value);
+    const sizeVal=document.getElementById('f-size').value;
+    const isFullBottle = sizeVal === 'full';
+    const size = isFullBottle ? Math.floor(p.ml_disponibles) : parseInt(sizeVal);
     const qty=parseInt(document.getElementById('f-qty').value)||1;
-    const ml=size*qty;
+    const ml = isFullBottle ? p.ml_disponibles : size*qty;
     const date=document.getElementById('f-date').value;
-    const priceMap={2:p.p2ml,5:p.p5ml,10:p.p10ml};
+    // Full bottle price: costo_ml * ml_inicial * (1 + margen_botella)
+    const margenBottle = 0.12; // 12% default, configurable later
+    const fullBottlePrice = isFullBottle ? Math.ceil((p.costo_ml||0) * p.ml_inicial * (1 + margenBottle) / 5) * 5 : 0;
+    const priceMap={2:p.p2ml,5:p.p5ml,10:p.p10ml,'full':fullBottlePrice};
     const shipping=parseFloat(document.getElementById('f-shipping').value)||0;
     const order_num=document.getElementById('f-ordernum').value.trim()||`OLF-${Date.now()}`;
     const client_name=document.getElementById('f-name').value.trim();
     const client_email=document.getElementById('f-email').value.trim();
     const client_phone=document.getElementById('f-phone').value.trim();
     const address=document.getElementById('f-address').value.trim();
-    const notes=document.getElementById('f-notes').value.trim();
+    const notesVal=document.getElementById('f-notes').value.trim();
     const sendEmail=document.getElementById('f-send-email').checked;
+    const itemRevenue = isFullBottle ? fullBottlePrice : (priceMap[size]||0)*qty;
+    const itemNotes = isFullBottle ? `Botella completa ${p.ml_disponibles.toFixed(1)}ml. ${notesVal}` : notesVal;
 
     // Build full order items: cart + current
-    const allItems=[...state.cart,{fragrance_id:p.id,nombre:p.nombre,casa:p.casa,codigo:p.codigo,size,qty,ml,revenue:(priceMap[size]||0)*qty}];
+    const allItems=[...state.cart,{fragrance_id:p.id,nombre:p.nombre,casa:p.casa,codigo:p.codigo,size:isFullBottle?'full':size,qty:isFullBottle?1:qty,ml,revenue:itemRevenue}];
 
     // Validate stock for all items
     const stockCheck={};
@@ -1434,6 +1578,16 @@ function renderDetail() {
       setSyncState('error','Error: '+e.message);
       btn.disabled=false; btn.textContent='Registrar Orden';
     }
+  });
+
+  // Adjust stock
+  document.getElementById('btn-adjust').addEventListener('click',async()=>{
+    const ml = parseFloat(document.getElementById('adj-ml').value);
+    const reason = document.getElementById('adj-reason').value;
+    const notes = document.getElementById('adj-notes').value.trim();
+    if(!ml||ml<=0){alert('Ingresa la cantidad a ajustar');return;}
+    if(!confirm(`¿Restar ${ml}ml de ${p.nombre}? (${reason})`)) return;
+    await adjustStock(p.id, ml, reason, notes);
   });
 
   // Restock
@@ -1959,8 +2113,8 @@ document.getElementById('btn-cmd').addEventListener('click',openCmd);
 let activeTab='inventory';
 function switchTab(tab) {
   activeTab=tab;
-  const displays={inventory:'grid',fulfill:'block',orders:'block',dashboard:'block',customers:'block',settings:'block'};
-  ['inventory','fulfill','orders','dashboard','customers','settings'].forEach(t=>{
+  const displays={inventory:'grid',fulfill:'block',orders:'block',dashboard:'block',customers:'block',settings:'block',layers:'block'};
+  ['inventory','fulfill','orders','dashboard','customers','settings','layers'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?displays[t]:'none';
   });
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
@@ -1969,6 +2123,7 @@ function switchTab(tab) {
   if(tab==='dashboard') renderDashboard();
   if(tab==='customers') renderCustomers();
   if(tab==='settings')  updateSettingsUI();
+  if(tab==='layers')    renderLayers();
 }
 document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
 document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{
@@ -2098,6 +2253,199 @@ document.getElementById('cust-modal').addEventListener('click', e => {
   if(e.target===document.getElementById('cust-modal')) document.getElementById('cust-modal').classList.add('hidden');
 });
 
+
+// ═══════════════════════════════════════
+// LAYERS
+// ═══════════════════════════════════════
+let layersData = [
+  {id:'layer-1',name:'Paragon × Atomic Rose',desc:'Initio recomienda oficialmente esta combinación en su sitio. Paragon aporta una base amaderada y animal mientras Atomic Rose añade una dimensión floral volátil y especiada. El resultado es una firma única, magnética e imposible de ignorar.',occasion:'Cita especial, Noche de gala',climate:'Frío o templado',frag1_id:182,frag1_size:5,frag2_id:98,frag2_size:5,price:1200,enabled:true},
+  {id:'layer-2',name:'Hawas × Supremacy CE',desc:'Hawas trae frescura acuática y vivacidad mediterránea; Supremacy Collector\u2019s Edition complementa con profundidad oriental y elegancia árabe. Juntos crean un contraste dinámico: fresco por encima, cálido y sofisticado en la base.',occasion:'Día de verano, Brunch, Salida casual',climate:'Cálido y húmedo',frag1_id:17,frag1_size:5,frag2_id:27,frag2_size:5,price:350,enabled:true},
+];
+
+let currentLayerForOrder = null;
+
+function showCreateLayer() {
+  const wrap = document.getElementById('layer-form-wrap');
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  // Set today's date
+  document.getElementById('lom-date') && (document.getElementById('lom-date').value = new Date().toISOString().split('T')[0]);
+}
+
+function saveLayer() {
+  const name = document.getElementById('ly-name').value.trim();
+  const price = parseFloat(document.getElementById('ly-price').value)||0;
+  const desc = document.getElementById('ly-desc').value.trim();
+  const occasion = document.getElementById('ly-occasion').value.trim();
+  const climate = document.getElementById('ly-climate').value.trim();
+  const frag1_id = parseInt(document.getElementById('ly-frag1').value);
+  const frag1_size = parseInt(document.getElementById('ly-size1').value);
+  const frag2_id = parseInt(document.getElementById('ly-frag2').value);
+  const frag2_size = parseInt(document.getElementById('ly-size2').value);
+  if(!name||!frag1_id||!frag2_id){alert('Completa nombre y ambas fragancias');return;}
+  const layer = {id:'layer-'+Date.now(),name,desc,occasion,climate,frag1_id,frag1_size,frag2_id,frag2_size,price,enabled:true};
+  layersData.push(layer);
+  document.getElementById('layer-form-wrap').style.display='none';
+  renderLayers();
+  toast('Layer creado',name,'success');
+}
+
+function toggleLayer(id) {
+  const l = layersData.find(x=>x.id===id);
+  if(l) { l.enabled=!l.enabled; renderLayers(); }
+}
+
+function deleteLayer(id) {
+  if(!confirm('¿Eliminar este Layer?')) return;
+  layersData = layersData.filter(x=>x.id!==id);
+  renderLayers();
+}
+
+function openLayerOrder(id) {
+  const l = layersData.find(x=>x.id===id);
+  if(!l) return;
+  currentLayerForOrder = l;
+  const p1 = state.products.find(x=>x.id===l.frag1_id);
+  const p2 = state.products.find(x=>x.id===l.frag2_id);
+  document.getElementById('layer-modal-title').textContent = 'Vender: ' + l.name;
+  document.getElementById('lom-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('layer-modal-summary').innerHTML = `
+    <div style="background:var(--bg);border-radius:8px;padding:12px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;color:var(--text);margin-bottom:8px">Contenido del bundle:</div>
+      ${p1?`<div style="display:flex;justify-content:space-between;padding:4px 0;font-family:'Space Grotesk',sans-serif;font-size:12px;border-bottom:1px solid var(--border)">
+        <span>${p1.nombre} · ${l.frag1_size}ml</span>
+        <span style="color:var(--green)">${fmt({2:p1.p2ml,5:p1.p5ml,10:p1.p10ml}[l.frag1_size]||0)}</span>
+      </div>`:''}
+      ${p2?`<div style="display:flex;justify-content:space-between;padding:4px 0;font-family:'Space Grotesk',sans-serif;font-size:12px">
+        <span>${p2.nombre} · ${l.frag2_size}ml</span>
+        <span style="color:var(--green)">${fmt({2:p2.p2ml,5:p2.p5ml,10:p2.p10ml}[l.frag2_size]||0)}</span>
+      </div>`:''}
+      <div style="display:flex;justify-content:space-between;padding:8px 0 0;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);border-top:1px solid var(--border);margin-top:4px">
+        <span>Precio Bundle</span><span style="color:var(--green)">${fmt(l.price)}</span>
+      </div>
+    </div>`;
+  document.getElementById('layer-order-modal').classList.remove('hidden');
+}
+
+async function registerLayerOrder() {
+  const l = currentLayerForOrder;
+  if(!l) return;
+  const p1 = state.products.find(x=>x.id===l.frag1_id);
+  const p2 = state.products.find(x=>x.id===l.frag2_id);
+  if(!p1||!p2){alert('Fragancia no encontrada en inventario');return;}
+  if(p1.ml_disponibles < l.frag1_size){alert(`Stock insuficiente: ${p1.nombre} (${p1.ml_disponibles.toFixed(1)}ml disponibles)`);return;}
+  if(p2.ml_disponibles < l.frag2_size){alert(`Stock insuficiente: ${p2.nombre} (${p2.ml_disponibles.toFixed(1)}ml disponibles)`);return;}
+
+  const order_num = document.getElementById('lom-ordernum').value.trim()||`OLF-${Date.now()}`;
+  const date = document.getElementById('lom-date').value;
+  const client_name = document.getElementById('lom-name').value.trim();
+  const client_email = document.getElementById('lom-email').value.trim();
+  const client_phone = document.getElementById('lom-phone').value.trim();
+  const address = document.getElementById('lom-address').value.trim();
+  const shipping = parseFloat(document.getElementById('lom-shipping').value)||0;
+
+  const btn = document.getElementById('lom-btn');
+  btn.disabled=true; btn.textContent='Guardando...';
+  setSyncState('syncing','Guardando Layer...');
+
+  try {
+    // Save both fragrances as separate order rows
+    const items = [
+      {prod:p1,size:l.frag1_size,ml:l.frag1_size,revenue:Math.round(l.price*0.5)},
+      {prod:p2,size:l.frag2_size,ml:l.frag2_size,revenue:Math.round(l.price*0.5)},
+    ];
+    for(const item of items){
+      const oid = `OLF-${Date.now()}-${item.prod.id}`;
+      const row = [oid,date,item.prod.id,item.prod.nombre,item.prod.casa,item.prod.codigo||'',item.size,1,item.ml,item.revenue,shipping/2,order_num,client_name,client_email,client_phone,address,`Layer: ${l.name}`];
+      await appendRow(SHEETS.ORDERS,row);
+      state.orders.push({order_id:oid,date,fragrance_id:item.prod.id,fragrance:item.prod.nombre,casa:item.prod.casa,codigo:item.prod.codigo||'',size:item.size,qty:1,ml:item.ml,revenue:item.revenue,shipping:shipping/2,order_num,client_name,client_email,client_phone,address,notes:`Layer: ${l.name}`});
+    }
+    // Fulfillment
+    const frow = [order_num,'pendiente',client_name,client_email,client_phone,address,date,'','','Layer: '+l.name];
+    await appendRow(SHEETS.FULFILL,frow);
+    state.fulfillment.push({order_num,status:'pendiente',client_name,client_email,client_phone,address,created:date,shipped:'',tracking:'',notes:'Layer: '+l.name});
+
+    rebuildProducts(); renderAll(); renderLayers();
+    document.getElementById('layer-order-modal').classList.add('hidden');
+    toast(`Layer vendido: ${l.name}`,`Orden ${order_num} · ${fmt(l.price)}`,'success');
+    setSyncState('ok',`Guardado · ${new Date().toLocaleTimeString('es-MX')}`);
+  } catch(e){
+    setSyncState('error','Error: '+e.message);
+  }
+  btn.disabled=false; btn.textContent='Registrar Orden de Layer';
+}
+
+function renderLayers() {
+  const list = document.getElementById('layers-list');
+  if(!list) return;
+  if(!layersData.length){
+    list.innerHTML=`<div class="empty-table" style="padding:40px">Sin layers creados. Crea tu primera combinación armónica.</div>`;
+    return;
+  }
+  list.innerHTML = layersData.map(l=>{
+    const p1 = state.products.find(x=>x.id===l.frag1_id);
+    const p2 = state.products.find(x=>x.id===l.frag2_id);
+    const stock1ok = p1&&p1.ml_disponibles>=l.frag1_size;
+    const stock2ok = p2&&p2.ml_disponibles>=l.frag2_size;
+    const canSell = stock1ok && stock2ok;
+    return `<div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:20px;margin-bottom:14px;${!l.enabled?'opacity:0.5':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text)">${l.name}</div>
+          <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:4px;max-width:520px">${l.desc||'—'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:16px">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--green)">${fmt(l.price)}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);margin-top:2px">Bundle</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        ${l.occasion?`<span style="padding:3px 10px;background:rgba(26,95,168,0.07);border:1px solid rgba(26,95,168,0.18);border-radius:20px;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--blue)">📍 ${l.occasion}</span>`:''}
+        ${l.climate?`<span style="padding:3px 10px;background:rgba(45,122,82,0.07);border:1px solid rgba(45,122,82,0.18);border-radius:20px;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--green)">🌡 ${l.climate}</span>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        ${[{p:p1,size:l.frag1_size,ok:stock1ok},{p:p2,size:l.frag2_size,ok:stock2ok}].map((item,i)=>`
+        <div style="background:var(--bg);border-radius:8px;padding:12px;border:1px solid ${item.ok?'rgba(45,122,82,0.2)':'rgba(192,57,43,0.2)'}">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Fragancia ${i+1}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;color:var(--text)">${item.p?.nombre||'No encontrada'}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted);margin-top:2px">${item.p?.casa||''} · ${item.size}ml</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;margin-top:4px;color:${item.ok?'var(--green)':'var(--red)'}">
+            ${item.ok?`✓ ${item.p?.ml_disponibles.toFixed(1)}ml disponibles`:`✗ Stock insuficiente`}
+          </div>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="openLayerOrder('${l.id}')" ${!canSell||!l.enabled?'disabled':''}>
+          Vender Bundle
+        </button>
+        <button class="btn-secondary" onclick="toggleLayer('${l.id}')">
+          ${l.enabled?'Deshabilitar':'Habilitar'}
+        </button>
+        <button class="btn-danger" onclick="deleteLayer('${l.id}')">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// STOCK ADJUSTMENT (merma / ajuste manual)
+// ═══════════════════════════════════════
+async function adjustStock(fragId, ml_to_remove, reason, notes) {
+  const p = state.products.find(x=>x.id===fragId);
+  if(!p) return;
+  if(ml_to_remove > p.ml_disponibles){alert(`No puedes remover más ml de los disponibles (${p.ml_disponibles.toFixed(1)}ml)`);return;}
+  const id = `ADJ-${Date.now()}`;
+  const date = new Date().toISOString().split('T')[0];
+  // Save as negative restock (reposición negativa)
+  setSyncState('syncing','Guardando ajuste...');
+  try {
+    await appendRow('Reposiciones',[id,date,fragId,p.nombre,-ml_to_remove,`${reason}: ${notes}`]);
+    state.restocks.push({id,date,fragrance_id:fragId,fragrance:p.nombre,ml_added:-ml_to_remove,notes:`${reason}: ${notes}`});
+    rebuildProducts(); renderAll();
+    toast(`Stock ajustado`,`-${ml_to_remove}ml de ${p.nombre} (${reason})`,'warn');
+    setSyncState('ok','Ajuste guardado');
+  } catch(e){setSyncState('error','Error: '+e.message);}
+}
+
 // ═══════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════
@@ -2111,17 +2459,5 @@ document.getElementById('tab-inventory').style.display='grid';
 
 setSyncState('', 'Inicia sesión para sincronizar');
 document.getElementById('overlay').classList.remove('hidden');
-</script>
-
-<!-- CUSTOMER MODAL -->
-<div class="modal-overlay hidden" id="cust-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-cust-name">Cliente</div>
-      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">✕</button>
-    </div>
-    <div class="modal-body" id="modal-cust-body"></div>
-  </div>
-</div>
-</body>
+</script></body>
 </html>
