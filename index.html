@@ -557,6 +557,8 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
   <button class="tab-btn" data-tab="customers">👤 Clientes</button>
   <button class="tab-btn" data-tab="settings">⚙️ Ajustes</button>
+  <button class="tab-btn" data-tab="layers">🎵 Layers</button>
+  <button class="tab-btn" data-tab="catalogo">📋 Catálogo</button>
 </div>
 
 <!-- TAB: INVENTORY -->
@@ -2229,6 +2231,112 @@ document.getElementById('cat-cat').addEventListener('change', renderCatalog);
 document.getElementById('cat-sort').addEventListener('change', renderCatalog);
 
 // ═══════════════════════════════════════
+
+// LAYERS
+let layersData=[
+  {id:'layer-1',name:'Paragon × Atomic Rose',desc:'Initio recomienda esta combinación. Paragon aporta una base amaderada y animal; Atomic Rose añade floral volátil y especiado. Firma única e imposible de ignorar.',occasion:'Cita especial, Noche de gala',climate:'Frío o templado',frag1_id:182,frag1_size:5,frag2_id:98,frag2_size:5,price:1200,enabled:true},
+  {id:'layer-2',name:'Hawas × Supremacy CE',desc:'Hawas trae frescura acuática mediterránea; Supremacy CE complementa con profundidad oriental. Contraste dinámico: fresco por encima, cálido y sofisticado en la base.',occasion:'Día de verano, Brunch',climate:'Cálido y húmedo',frag1_id:17,frag1_size:5,frag2_id:27,frag2_size:5,price:350,enabled:true},
+];
+let currentLayerForOrder=null;
+function showCreateLayer(){
+  const w=document.getElementById('layer-form-wrap');
+  w.style.display=w.style.display==='none'?'block':'none';
+  ['ly-frag1','ly-frag2'].forEach(id=>{
+    const s=document.getElementById(id);
+    if(s&&s.options.length<=1){[...CATALOG].sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.nombre+' ('+p.casa+')';s.appendChild(o);});}
+  });
+}
+function saveLayer(){
+  const name=document.getElementById('ly-name').value.trim();
+  const price=parseFloat(document.getElementById('ly-price').value)||0;
+  const frag1_id=parseInt(document.getElementById('ly-frag1').value);
+  const frag2_id=parseInt(document.getElementById('ly-frag2').value);
+  if(!name||!frag1_id||!frag2_id){alert('Completa nombre y ambas fragancias');return;}
+  layersData.push({id:'layer-'+Date.now(),name,desc:document.getElementById('ly-desc').value.trim(),occasion:document.getElementById('ly-occasion').value.trim(),climate:document.getElementById('ly-climate').value.trim(),frag1_id,frag1_size:parseInt(document.getElementById('ly-size1').value),frag2_id,frag2_size:parseInt(document.getElementById('ly-size2').value),price,enabled:true});
+  document.getElementById('layer-form-wrap').style.display='none';
+  renderLayers(); toast('Layer creado',name,'success');
+}
+function toggleLayer(id){const l=layersData.find(x=>x.id===id);if(l){l.enabled=!l.enabled;renderLayers();}}
+function deleteLayer(id){if(!confirm('Eliminar este Layer?'))return;layersData=layersData.filter(x=>x.id!==id);renderLayers();}
+function openLayerOrder(id){
+  const l=layersData.find(x=>x.id===id);if(!l)return;
+  currentLayerForOrder=l;
+  const p1=state.products.find(x=>x.id===l.frag1_id);
+  const p2=state.products.find(x=>x.id===l.frag2_id);
+  document.getElementById('layer-modal-title').textContent='Vender: '+l.name;
+  document.getElementById('lom-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('layer-modal-summary').innerHTML='<div style="background:var(--bg);border-radius:8px;padding:12px">'+(p1?'<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px"><span>'+p1.nombre+' '+l.frag1_size+'ml</span><span style="color:var(--green)">'+fmt({2:p1.p2ml,5:p1.p5ml,10:p1.p10ml}[l.frag1_size]||0)+'</span></div>':'')+(p2?'<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span>'+p2.nombre+' '+l.frag2_size+'ml</span><span style="color:var(--green)">'+fmt({2:p2.p2ml,5:p2.p5ml,10:p2.p10ml}[l.frag2_size]||0)+'</span></div>':'')+'<div style="display:flex;justify-content:space-between;padding:8px 0 0;border-top:1px solid var(--border);margin-top:4px;font-weight:600"><span>Bundle</span><span style="color:var(--green)">'+fmt(l.price)+'</span></div></div>';
+  document.getElementById('layer-order-modal').classList.remove('hidden');
+}
+async function registerLayerOrder(){
+  const l=currentLayerForOrder;if(!l)return;
+  const p1=state.products.find(x=>x.id===l.frag1_id);
+  const p2=state.products.find(x=>x.id===l.frag2_id);
+  if(!p1||!p2){alert('Fragancia no encontrada');return;}
+  if(p1.ml_disponibles<l.frag1_size){alert('Stock insuficiente: '+p1.nombre);return;}
+  if(p2.ml_disponibles<l.frag2_size){alert('Stock insuficiente: '+p2.nombre);return;}
+  const order_num=document.getElementById('lom-ordernum').value.trim()||'OLF-'+Date.now();
+  const date=document.getElementById('lom-date').value;
+  const client_name=document.getElementById('lom-name').value.trim();
+  const client_email=document.getElementById('lom-email').value.trim();
+  const client_phone=document.getElementById('lom-phone').value.trim();
+  const address=document.getElementById('lom-address').value.trim();
+  const shipping=parseFloat(document.getElementById('lom-shipping').value)||0;
+  const btn=document.getElementById('lom-btn');
+  btn.disabled=true;btn.textContent='Guardando...';
+  setSyncState('syncing','Guardando Layer...');
+  try{
+    for(const item of [{prod:p1,size:l.frag1_size,ml:l.frag1_size,rev:Math.round(l.price*0.5)},{prod:p2,size:l.frag2_size,ml:l.frag2_size,rev:Math.round(l.price*0.5)}]){
+      const oid='OLF-'+Date.now()+'-'+item.prod.id;
+      await appendRow(SHEETS.ORDERS,[oid,date,item.prod.id,item.prod.nombre,item.prod.casa,item.prod.codigo||'',item.size,1,item.ml,item.rev,shipping/2,order_num,client_name,client_email,client_phone,address,'Layer: '+l.name]);
+      state.orders.push({order_id:oid,date,fragrance_id:item.prod.id,fragrance:item.prod.nombre,casa:item.prod.casa,codigo:item.prod.codigo||'',size:item.size,qty:1,ml:item.ml,revenue:item.rev,shipping:shipping/2,order_num,client_name,client_email,client_phone,address,notes:'Layer: '+l.name});
+    }
+    await appendRow(SHEETS.FULFILL,[order_num,'pendiente',client_name,client_email,client_phone,address,date,'','','Layer: '+l.name]);
+    state.fulfillment.push({order_num,status:'pendiente',client_name,client_email,client_phone,address,created:date,shipped:'',tracking:'',notes:'Layer: '+l.name});
+    rebuildProducts();renderAll();renderLayers();
+    document.getElementById('layer-order-modal').classList.add('hidden');
+    toast('Layer vendido: '+l.name,'Orden '+order_num+' - '+fmt(l.price),'success');
+    setSyncState('ok','Guardado - '+new Date().toLocaleTimeString('es-MX'));
+  }catch(e){setSyncState('error','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Registrar Orden de Layer';
+}
+function renderLayers(){
+  const list=document.getElementById('layers-list');if(!list)return;
+  if(!layersData.length){list.innerHTML='<div class="empty-table" style="padding:40px">Sin layers creados.</div>';return;}
+  list.innerHTML=layersData.map(l=>{
+    const p1=state.products.find(x=>x.id===l.frag1_id);
+    const p2=state.products.find(x=>x.id===l.frag2_id);
+    const ok1=p1&&p1.ml_disponibles>=l.frag1_size;
+    const ok2=p2&&p2.ml_disponibles>=l.frag2_size;
+    const frags=[{p:p1,size:l.frag1_size,ok:ok1},{p:p2,size:l.frag2_size,ok:ok2}];
+    return `<div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:20px;margin-bottom:14px;opacity:${l.enabled?1:0.5}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--text)">${l.name}</div>
+          <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:4px">${l.desc||''}</div>
+        </div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--green);flex-shrink:0;margin-left:16px">${fmt(l.price)}</div>
+      </div>
+      ${l.occasion?`<div style="margin-bottom:10px;font-size:11px;color:var(--blue)">Ocasion: ${l.occasion} | Clima: ${l.climate||'—'}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        ${frags.map((item,i)=>`<div style="background:var(--bg);border-radius:8px;padding:12px;border:1px solid ${item.ok?'rgba(45,122,82,0.2)':'rgba(192,57,43,0.2)'}">
+          <div style="font-size:10px;color:var(--slate);text-transform:uppercase;margin-bottom:4px">Fragancia ${i+1}</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">${item.p?.nombre||'No encontrada'}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${item.p?.casa||''} - ${item.size}ml</div>
+          <div style="font-size:11px;margin-top:4px;color:${item.ok?'var(--green)':'var(--red)'}">
+            ${item.ok?`OK - ${item.p?.ml_disponibles.toFixed(1)}ml`:'Sin stock'}
+          </div>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="openLayerOrder('${l.id}')" ${(!ok1||!ok2||!l.enabled)?'disabled':''}>Vender Bundle</button>
+        <button class="btn-secondary" onclick="toggleLayer('${l.id}')">${l.enabled?'Deshabilitar':'Habilitar'}</button>
+        <button class="btn-danger" onclick="deleteLayer('${l.id}')">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // BOOT
 // ═══════════════════════════════════════
 // Restore dark mode preference
@@ -2329,6 +2437,74 @@ document.getElementById('overlay').classList.remove('hidden');
         </thead>
         <tbody id="catalogo-tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: LAYERS -->
+<div id="tab-layers" style="display:none">
+  <div style="padding:24px 32px;max-width:900px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Layers Armónicos</div>
+        <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:3px">Combinaciones curadas — el primer servicio de Layering en México</div>
+      </div>
+      <button class="btn-primary" onclick="showCreateLayer()">+ Crear Layer</button>
+    </div>
+    <div id="layer-form-wrap" style="display:none;margin-bottom:20px">
+      <div class="form-card">
+        <div class="form-divider">Nueva combinación de Layer</div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+          <div class="fg"><label>Nombre del Layer</label><input class="finput" id="ly-name" placeholder="ej. Desert Sunrise"></div>
+          <div class="fg"><label>Precio Bundle (MXN)</label><input class="finput" type="number" id="ly-price" placeholder="0"></div>
+        </div>
+        <div class="fg" style="margin-bottom:10px"><label>Descripción</label><input class="finput" id="ly-desc" placeholder="Por qué funcionan juntos..."></div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+          <div class="fg"><label>Ocasión</label><input class="finput" id="ly-occasion" placeholder="ej. Noche de verano..."></div>
+          <div class="fg"><label>Clima</label><input class="finput" id="ly-climate" placeholder="ej. Cálido y húmedo..."></div>
+        </div>
+        <div class="form-divider">Fragancias</div>
+        <div class="form-row" style="grid-template-columns:2fr 1fr;margin-bottom:8px">
+          <div class="fg"><label>Fragancia 1</label><select class="fselect" id="ly-frag1"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Tamaño</label><select class="fselect" id="ly-size1"><option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option></select></div>
+        </div>
+        <div class="form-row" style="grid-template-columns:2fr 1fr;margin-bottom:12px">
+          <div class="fg"><label>Fragancia 2</label><select class="fselect" id="ly-frag2"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Tamaño</label><select class="fselect" id="ly-size2"><option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="saveLayer()">Guardar Layer</button>
+          <button class="btn-secondary" onclick="document.getElementById('layer-form-wrap').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div id="layers-list"></div>
+  </div>
+</div>
+<!-- LAYER ORDER MODAL -->
+<div class="modal-overlay hidden" id="layer-order-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="layer-modal-title">Vender Layer</div>
+      <button class="modal-close" onclick="document.getElementById('layer-order-modal').classList.add('hidden')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="layer-modal-summary" style="margin-bottom:16px"></div>
+      <div class="form-divider">Datos de la orden</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg"><label>Orden #</label><input class="finput" id="lom-ordernum" placeholder="MP-001"></div>
+        <div class="fg"><label>Fecha</label><input class="finput" type="date" id="lom-date"></div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg"><label>Nombre cliente</label><input class="finput" id="lom-name" placeholder="Nombre completo"></div>
+        <div class="fg"><label>Email</label><input class="finput" type="email" id="lom-email" placeholder="cliente@email.com"></div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+        <div class="fg"><label>Teléfono</label><input class="finput" id="lom-phone" placeholder="+52 33..."></div>
+        <div class="fg"><label>Envío $</label><input class="finput" type="number" id="lom-shipping" placeholder="0"></div>
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label>Dirección</label><input class="finput" id="lom-address" placeholder="Calle, Colonia, Ciudad, CP"></div>
+      <button class="btn-primary" id="lom-btn" onclick="registerLayerOrder()">Registrar Orden de Layer</button>
     </div>
   </div>
 </div>
