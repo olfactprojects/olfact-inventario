@@ -2111,6 +2111,123 @@ document.getElementById('cust-modal').addEventListener('click', e => {
   if(e.target===document.getElementById('cust-modal')) document.getElementById('cust-modal').classList.add('hidden');
 });
 
+
+// ═══════════════════════════════════════
+// CATÁLOGO TAB
+// ═══════════════════════════════════════
+function initCatalogFilters() {
+  // Populate casa dropdown
+  const casas = [...new Set(CATALOG.map(p=>p.casa))].sort();
+  const casaSel = document.getElementById('cat-casa');
+  if(casaSel && casaSel.options.length <= 1) {
+    casas.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; casaSel.appendChild(o); });
+  }
+  // Populate category dropdown
+  const cats = [...new Set(CATALOG.map(p=>p.categoria))].sort();
+  const catSel = document.getElementById('cat-cat');
+  if(catSel && catSel.options.length <= 1) {
+    cats.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+  }
+}
+
+function resetCatalogFilters() {
+  document.getElementById('cat-search').value = '';
+  document.getElementById('cat-casa').value = '';
+  document.getElementById('cat-cat').value = '';
+  document.getElementById('cat-sort').value = 'alpha-asc';
+  renderCatalog();
+}
+
+function renderCatalog() {
+  initCatalogFilters();
+  const q = (document.getElementById('cat-search')?.value||'').toLowerCase();
+  const casaF = document.getElementById('cat-casa')?.value||'';
+  const catF = document.getElementById('cat-cat')?.value||'';
+  const sortF = document.getElementById('cat-sort')?.value||'alpha-asc';
+
+  // Build enriched product list
+  let prods = CATALOG.map(p => {
+    const prod = state.products.find(x=>x.id===p.id) || p;
+    const orders = state.orders.filter(o=>o.fragrance_id===p.id);
+    const totalMlSold = orders.reduce((s,o)=>s+o.ml,0);
+    const totalRevenue = orders.reduce((s,o)=>s+o.revenue,0);
+    const margen = (state.margins[p.id] != null ? state.margins[p.id] : p.margen_base) || p.margen_base || 0;
+    return {
+      ...p,
+      ml_disponibles: prod.ml_disponibles ?? p.ml_inicial,
+      p2ml: prod.p2ml ?? p.p2ml,
+      p5ml: prod.p5ml ?? p.p5ml,
+      p10ml: prod.p10ml ?? p.p10ml,
+      totalMlSold,
+      totalRevenue,
+      margen,
+    };
+  });
+
+  // Filter
+  if(q) prods = prods.filter(p =>
+    p.nombre.toLowerCase().includes(q) ||
+    p.casa.toLowerCase().includes(q) ||
+    (p.codigo||'').toLowerCase().includes(q)
+  );
+  if(casaF) prods = prods.filter(p => p.casa === casaF);
+  if(catF)  prods = prods.filter(p => p.categoria === catF);
+
+  // Sort
+  const sorts = {
+    'alpha-asc':    (a,b) => a.nombre.localeCompare(b.nombre),
+    'alpha-desc':   (a,b) => b.nombre.localeCompare(a.nombre),
+    'casa-asc':     (a,b) => a.casa.localeCompare(b.casa) || a.nombre.localeCompare(b.nombre),
+    'stock-desc':   (a,b) => b.ml_disponibles - a.ml_disponibles,
+    'stock-asc':    (a,b) => a.ml_disponibles - b.ml_disponibles,
+    'margin-desc':  (a,b) => b.margen - a.margen,
+    'margin-asc':   (a,b) => a.margen - b.margen,
+    'price-desc':   (a,b) => b.p10ml - a.p10ml,
+    'price-asc':    (a,b) => a.p10ml - b.p10ml,
+    'sales-desc':   (a,b) => b.totalMlSold - a.totalMlSold,
+    'sales-asc':    (a,b) => a.totalMlSold - b.totalMlSold,
+    'ml-desc':      (a,b) => b.ml_inicial - a.ml_inicial,
+    'ml-asc':       (a,b) => a.ml_inicial - b.ml_inicial,
+  };
+  prods.sort(sorts[sortF] || sorts['alpha-asc']);
+
+  document.getElementById('catalogo-count').textContent = `${prods.length} fragancias`;
+
+  const tbody = document.getElementById('catalogo-tbody');
+  if(!prods.length) {
+    tbody.innerHTML = `<tr><td colspan="12" class="empty-table">Sin resultados</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = prods.map(p => {
+    const sl = p.ml_disponibles < 2 ? 'out' : p.ml_disponibles < 20 ? 'crit' : p.ml_disponibles < 40 ? 'low' : 'ok';
+    const stockColor = sl==='out'||sl==='crit' ? 'var(--red)' : sl==='low' ? 'var(--amber)' : 'var(--green)';
+    return `<tr onclick="switchTab('inventory');state.selected=${p.id};renderList();renderDetail();" style="cursor:pointer">
+      <td>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:12px">${p.nombre}</div>
+        <div style="font-size:10px;color:var(--muted);font-style:italic">${p.concentracion||''}</div>
+      </td>
+      <td style="font-size:11px">${p.casa}</td>
+      <td style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate)">${p.codigo||'—'}</td>
+      <td><span class="badge badge-navy" style="font-size:9px">${(p.categoria||'').replace('Nicho Accesible / Árabe','Árabe').replace('Diseñador ','Dis. ')}</span></td>
+      <td style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--muted)">${p.ml_inicial?.toFixed(0)}ml</td>
+      <td style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:${stockColor}">${p.ml_disponibles?.toFixed(1)}ml</td>
+      <td class="td-green">${fmt(p.p2ml)}</td>
+      <td class="td-green">${fmt(p.p5ml)}</td>
+      <td class="td-green">${fmt(p.p10ml)}</td>
+      <td style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:var(--blue)">${Math.round((p.margen||0)*100)}%</td>
+      <td style="font-size:11px;color:var(--muted)">${p.totalMlSold>0?p.totalMlSold.toFixed(1)+'ml':'—'}</td>
+      <td class="td-green" style="font-size:11px">${p.totalRevenue>0?fmt(p.totalRevenue):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Wire up catalog filters
+document.getElementById('cat-search').addEventListener('input', renderCatalog);
+document.getElementById('cat-casa').addEventListener('change', renderCatalog);
+document.getElementById('cat-cat').addEventListener('change', renderCatalog);
+document.getElementById('cat-sort').addEventListener('change', renderCatalog);
+
 // ═══════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════
@@ -2134,6 +2251,85 @@ document.getElementById('overlay').classList.remove('hidden');
       <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">✕</button>
     </div>
     <div class="modal-body" id="modal-cust-body"></div>
+  </div>
+</div>
+
+<!-- TAB: CATÁLOGO -->
+<div id="tab-catalogo" style="display:none">
+  <div style="padding:24px 32px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Catálogo Completo</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)" id="catalogo-count"></div>
+    </div>
+
+    <!-- Filters & Sort Bar -->
+    <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;background:var(--white);border:1px solid var(--border-mid);border-radius:10px;padding:14px">
+      <!-- Search -->
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Buscar</div>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input class="search-input" id="cat-search" type="text" placeholder="Nombre, código, casa...">
+        </div>
+      </div>
+      <!-- Casa filter -->
+      <div style="min-width:160px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Casa</div>
+        <select class="fselect" id="cat-casa" style="width:100%">
+          <option value="">Todas las casas</option>
+        </select>
+      </div>
+      <!-- Category filter -->
+      <div style="min-width:160px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Categoría</div>
+        <select class="fselect" id="cat-cat" style="width:100%">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <!-- Sort -->
+      <div style="min-width:200px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Ordenar por</div>
+        <select class="fselect" id="cat-sort" style="width:100%">
+          <option value="alpha-asc">Nombre A→Z</option>
+          <option value="alpha-desc">Nombre Z→A</option>
+          <option value="casa-asc">Casa A→Z</option>
+          <option value="stock-desc">Mayor stock</option>
+          <option value="stock-asc">Menor stock</option>
+          <option value="margin-desc">Mayor margen</option>
+          <option value="margin-asc">Menor margen</option>
+          <option value="price-desc">Mayor precio (10ml)</option>
+          <option value="price-asc">Menor precio (10ml)</option>
+          <option value="sales-desc">Más vendidos</option>
+          <option value="sales-asc">Menos vendidos</option>
+          <option value="ml-desc">Mayor tamaño botella</option>
+          <option value="ml-asc">Menor tamaño botella</option>
+        </select>
+      </div>
+      <button class="btn-secondary" onclick="resetCatalogFilters()">Limpiar</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="catalogo-table">
+        <thead>
+          <tr>
+            <th>Fragancia</th>
+            <th>Casa</th>
+            <th>Código</th>
+            <th>Categoría</th>
+            <th>ml botella</th>
+            <th>Stock actual</th>
+            <th>P2ml</th>
+            <th>P5ml</th>
+            <th>P10ml</th>
+            <th>Margen</th>
+            <th>Ventas (ml)</th>
+            <th>Ingresos</th>
+          </tr>
+        </thead>
+        <tbody id="catalogo-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 </body>
