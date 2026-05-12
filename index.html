@@ -555,11 +555,11 @@ tr:hover td{background:rgba(33,60,78,0.02)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab-btn active" data-tab="despacho">📦 Despacho</button>
+  <button class="tab-btn" data-tab="despacho">📦 Despacho</button>
+  <button class="tab-btn active" data-tab="catalogo">🗂️ Catálogo</button>
   <button class="tab-btn" data-tab="ordenes">📋 Órdenes</button>
   <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
   <button class="tab-btn" data-tab="clientes">👤 Clientes</button>
-  <button class="tab-btn" data-tab="catalogo">🗂️ Catálogo</button>
   <button class="tab-btn" data-tab="ajustes">⚙️ Ajustes</button>
 </div>
 
@@ -773,57 +773,46 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     </div>
   </div>
 </div>
-<!-- TAB: ÓRDENES -->
+<!-- TAB: ÓRDENES (Historial + Fulfillment integrado) -->
 <div id="tab-ordenes" style="display:none">
-  <div style="display:flex;gap:0;background:var(--white);border-bottom:1px solid var(--border-mid);padding:0 24px">
-    <button class="sub-tab-btn active" onclick="switchSubTab('ordenes','fulfillment',this)">🚚 Fulfillment</button>
-    <button class="sub-tab-btn" onclick="switchSubTab('ordenes','historial',this)">📋 Historial</button>
-  </div>
-  <div id="sub-ordenes-fulfillment">
-    <div class="fulfill-tab">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-        <div>
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text)">Fulfillment</div>
-          <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted)">Órdenes agrupadas por pedido</div>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="pill active" data-fulfill-filter="all">Todas</button>
-          <button class="pill" data-fulfill-filter="pendiente">Pendientes</button>
-          <button class="pill" data-fulfill-filter="preparando">Preparando</button>
-          <button class="pill" data-fulfill-filter="enviado">Enviadas</button>
-          <button class="pill" data-fulfill-filter="entregado">Entregadas</button>
-        </div>
+  <div style="padding:20px 32px;max-width:100%">
+    <!-- Stats + filters -->
+    <div class="orders-header" style="margin-bottom:14px">
+      <div class="orders-title">Órdenes</div>
+      <div class="ostats">
+        <div class="ostat"><div class="ostat-val" id="ot-count">0</div><div class="ostat-lbl">Órdenes</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-rev">$0</div><div class="ostat-lbl">Ingresos</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-ml">0ml</div><div class="ostat-lbl">ml vendidos</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-ship">$0</div><div class="ostat-lbl">Envíos</div></div>
       </div>
-      <div id="fulfill-list"></div>
     </div>
-  </div>
-  <div id="sub-ordenes-historial" style="display:none">
-    <div class="orders-tab">
-      <div class="orders-header">
-        <div class="orders-title">Historial de Órdenes</div>
-        <div class="ostats">
-          <div class="ostat"><div class="ostat-val" id="ot-count">0</div><div class="ostat-lbl">Órdenes</div></div>
-          <div class="ostat"><div class="ostat-val" id="ot-rev">$0</div><div class="ostat-lbl">Ingresos</div></div>
-          <div class="ostat"><div class="ostat-val" id="ot-ml">0ml</div><div class="ostat-lbl">ml vendidos</div></div>
-          <div class="ostat"><div class="ostat-val" id="ot-ship">$0</div><div class="ostat-lbl">Envíos</div></div>
-        </div>
-      </div>
-      <div class="filter-bar">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="filter-bar" style="margin-bottom:0">
         <span class="filter-lbl">Fecha:</span>
         <input type="date" class="date-input" id="ot-from">
         <span class="filter-lbl">—</span>
         <input type="date" class="date-input" id="ot-to">
         <button class="pill active" id="ot-clear">Limpiar</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Orden #</th><th>Fecha</th><th>Cliente</th><th>Fragancia / Items</th><th>Total</th><th>Estado</th>
-          </tr></thead>
-          <tbody id="ot-tbody"></tbody>
-        </table>
+      <div style="display:flex;gap:6px">
+        <button class="pill active" data-fulfill-filter="all">Todas</button>
+        <button class="pill" data-fulfill-filter="pendiente">Pendientes</button>
+        <button class="pill" data-fulfill-filter="preparando">Preparando</button>
+        <button class="pill" data-fulfill-filter="enviado">Enviadas</button>
+        <button class="pill" data-fulfill-filter="entregado">Entregadas</button>
       </div>
     </div>
+    <!-- Unified orders table with inline fulfillment controls -->
+    <div class="table-wrap">
+      <table style="width:100%">
+        <thead><tr>
+          <th>Orden #</th><th>Fecha</th><th>Cliente</th><th>Fragancia / Items</th>
+          <th>Total</th><th>Estado</th><th>Guía</th><th></th>
+        </tr></thead>
+        <tbody id="ot-tbody"></tbody>
+      </table>
+    </div>
+    <div id="fulfill-list" style="display:none"></div>
   </div>
 </div>
 
@@ -856,7 +845,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     </div>
   </div>
   <div id="sub-dashboard-finanzas" style="display:none">
-    <div style="padding:20px 32px;max-width:1000px">
+    <div style="padding:20px 32px">
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;gap:6px">
         <button class="period-btn active" data-fin-period="month" onclick="setFinPeriod('month',this)">Este mes</button>
         <button class="period-btn" data-fin-period="3month" onclick="setFinPeriod('3month',this)">3 meses</button>
@@ -899,7 +888,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
 
 <!-- TAB: AJUSTES -->
 <div id="tab-ajustes" style="display:none">
-  <div class="settings-tab">
+  <div style="padding:20px 32px;max-width:none">
     <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:18px">Ajustes</div>
     <div class="settings-section">
       <div class="settings-title">Costos de Materiales</div>
@@ -993,7 +982,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
 
 <!-- TAB: FINANZAS -->
 <div id="tab-finanzas" style="display:none">
-  <div style="padding:20px 32px;max-width:1000px">
+  <div style="padding:20px 32px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
       <div>
         <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text)">Finanzas</div>
@@ -1029,6 +1018,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     </div>
   </div>
 </div>
+
 
 
 
@@ -2007,7 +1997,21 @@ function renderOrdersTab(){
       <td>${g.client}</td>
       <td>${isMulti?`<span class="badge badge-navy">${g.items.length} fragancias</span>`:g.items[0].fragrance+'<br><span class="td-muted" style="font-size:10px">'+(g.items[0].codigo||'')+'</span>'}</td>
       <td class="td-green" style="font-weight:600">${fmt(g.total)}</td>
-      <td><span class="badge ${sBadge[g.status]||'badge-navy'}">${g.status}</span>${undoBtn}</td>
+      <td>
+        <select style="padding:3px 6px;border:1px solid var(--border-mid);border-radius:4px;font-size:10px;font-weight:500;cursor:pointer;outline:none;background:var(--bg);color:${g.status==='enviado'?'var(--green)':g.status==='entregado'?'var(--slate)':g.status==='preparando'?'var(--blue)':'var(--amber)'}" onchange="updateOrderStatus('${g.order_num}',this.value)">
+          <option value="pendiente" ${g.status==='pendiente'?'selected':''}>Pendiente</option>
+          <option value="preparando" ${g.status==='preparando'?'selected':''}>Preparando</option>
+          <option value="enviado" ${g.status==='enviado'?'selected':''}>Enviado</option>
+          <option value="entregado" ${g.status==='entregado'?'selected':''}>Entregado</option>
+        </select>
+      </td>
+      <td>
+        <input type="text" placeholder="Num. guia..." value="${(()=>{const f=state.fulfillment.find(f=>f.order_num===g.order_num);return f?.tracking||'';})()}"
+          style="width:110px;padding:3px 6px;border:1px solid var(--border-mid);border-radius:4px;font-size:10px;background:var(--bg);color:var(--text);outline:none"
+          onblur="updateOrderTracking('${g.order_num}',this.value)">
+        ${(()=>{const f=state.fulfillment.find(f=>f.order_num===g.order_num);return f?.tracking?`<a href="${getTrackingUrl(f.tracking)}" target="_blank" style="font-size:9px;color:var(--blue);margin-left:3px">🔗</a>`:''})()}
+      </td>
+      <td>${undoBtn}</td>
     </tr>`
       +(isMulti?'<tr id="'+gid+'" style="display:none"><td colspan="6" style="padding:0">'
         +'<table style="width:100%;border-collapse:collapse;background:var(--bg)"><thead><tr>'
@@ -2274,7 +2278,7 @@ document.getElementById('btn-cmd').addEventListener('click',openCmd);
 // ═══════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════
-let activeTab='despacho';
+let activeTab='catalogo';
 function switchTab(tab) {
   activeTab=tab;
   const displays={despacho:'block',ordenes:'block',dashboard:'block',clientes:'block',catalogo:'block',ajustes:'block'};
@@ -2282,11 +2286,19 @@ function switchTab(tab) {
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?(displays[t]||'block'):'none';
   });
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-  if(tab==='ordenes')   { renderOrdersTab(); renderFulfill(); }
+  if(tab==='ordenes')   renderOrdersTab();
   if(tab==='dashboard') { renderDashboard(); renderFinanzasTab(); }
   if(tab==='clientes')  renderCustomers();
   if(tab==='ajustes')   updateSettingsUI();
-  if(tab==='catalogo')  { renderCatalog(); renderLayers(); }
+  if(tab==='catalogo')  {
+    renderCatalog();
+    // Render whatever sub-panel is active
+    const activeSubBtn = document.querySelector('#tab-catalogo .sub-tab-btn.active');
+    const activeSub = activeSubBtn?.dataset?.sub || 'detalle';
+    if(activeSub==='layers') renderLayers();
+    if(activeSub==='precios') { renderPricingTab(); setTimeout(initSimChartEvents,50); }
+    renderList(); // always refresh list
+  }
   if(tab==='despacho')  renderDespachoTab();
 }
 document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
@@ -3794,13 +3806,15 @@ let despSelectedId = null;
 
 function renderDespachoTab() {
   const q = (document.getElementById('desp-search')?.value||'').toLowerCase();
-  let prods = state.products.filter(p=>p.ml_disponibles>=2);
+  // Use CATALOG as fallback if not logged in yet
+  const source = state.products.length > 0 ? state.products : CATALOG.map(p=>({...p,ml_disponibles:p.ml_inicial}));
+  let prods = source.filter(p=>p.ml_disponibles>=2);
   if(q) prods = prods.filter(p=>p.nombre.toLowerCase().includes(q)||p.casa.toLowerCase().includes(q));
   prods.sort((a,b)=>a.nombre.localeCompare(b.nombre));
 
   const grid = document.getElementById('desp-grid');
   if(!grid) return;
-  grid.innerHTML = prods.map(p=>{
+  grid.innerHTML = prods.length ? prods.map(p=>{
     const can2=p.ml_disponibles>=2, can5=p.ml_disponibles>=5, can10=p.ml_disponibles>=10;
     const isSelected = despSelectedId === p.id;
     return `<div onclick="selectDespFrag(${p.id})" style="background:var(--white);border:2px solid ${isSelected?'var(--navy)':'var(--border-mid)'};border-radius:10px;padding:14px;cursor:pointer;transition:all 0.15s;${isSelected?'box-shadow:0 0 0 3px rgba(33,60,78,0.1)':''}">
@@ -3813,7 +3827,7 @@ function renderDespachoTab() {
         ${can10?`<button class="btn-primary" style="padding:5px 8px;font-size:10px;flex:1;background:var(--green)" onclick="event.stopPropagation();quickSell(${p.id},10)">10ml ${fmt(p.p10ml)}</button>`:''}
       </div>
     </div>`;
-  }).join('');
+  }).join('') : '<div style="padding:40px;text-align:center;color:var(--muted);font-style:italic">Inicia sesion para ver fragancias con stock disponible</div>';
 }
 
 function selectDespFrag(id) {
@@ -4025,6 +4039,47 @@ function switchSubTab(parentTab, subTab, btn) {
   if(parentTab==='dashboard'&&subTab==='metricas') renderDashboard();
 }
 
+
+async function updateOrderStatus(orderNum, newStatus) {
+  const fdata = state.fulfillment.find(f=>f.order_num===orderNum);
+  if(fdata) fdata.status = newStatus;
+  else state.fulfillment.push({order_num:orderNum,status:newStatus,client_name:'',client_email:'',client_phone:'',address:'',created:'',shipped:'',tracking:'',notes:''});
+  if(newStatus==='enviado'&&fdata&&!fdata.shipped) fdata.shipped = new Date().toISOString().split('T')[0];
+  setSyncState('syncing','Actualizando estado...');
+  try {
+    const d = await sheetsReq('GET',`/values/${encodeURIComponent(SHEETS.FULFILL)}!A:A`);
+    const rows = d.values||[];
+    const rowIdx = rows.findIndex(r=>r[0]===orderNum);
+    const fd = state.fulfillment.find(f=>f.order_num===orderNum)||{};
+    if(rowIdx>0) {
+      await updateRow(SHEETS.FULFILL,rowIdx+1,[orderNum,newStatus,fd.client_name||'',fd.client_email||'',fd.client_phone||'',fd.address||'',fd.created||'',fd.shipped||'',fd.tracking||'',fd.notes||'']);
+    } else {
+      await appendRow(SHEETS.FULFILL,[orderNum,newStatus,'','','','','','','','']);
+    }
+    setSyncState('ok','Estado actualizado');
+    toast('Orden '+orderNum,'Estado: '+newStatus,'success',2500);
+  } catch(e){setSyncState('error','Error: '+e.message);}
+}
+
+async function updateOrderTracking(orderNum, tracking) {
+  const fdata = state.fulfillment.find(f=>f.order_num===orderNum);
+  if(!tracking||(fdata&&fdata.tracking===tracking)) return;
+  if(fdata) fdata.tracking = tracking;
+  setSyncState('syncing','Guardando guia...');
+  try {
+    const d = await sheetsReq('GET',`/values/${encodeURIComponent(SHEETS.FULFILL)}!A:A`);
+    const rows = d.values||[];
+    const rowIdx = rows.findIndex(r=>r[0]===orderNum);
+    const fd = state.fulfillment.find(f=>f.order_num===orderNum)||{};
+    if(rowIdx>0) {
+      await updateRow(SHEETS.FULFILL,rowIdx+1,[orderNum,fd.status||'pendiente',fd.client_name||'',fd.client_email||'',fd.client_phone||'',fd.address||'',fd.created||'',fd.shipped||'',tracking,fd.notes||'']);
+    }
+    setSyncState('ok','Guia guardada');
+    // Refresh to show tracking link
+    if(activeTab==='ordenes') renderOrdersTab();
+  } catch(e){setSyncState('error','Error: '+e.message);}
+}
+
 // BOOT
 // ═══════════════════════════════════════
 // Restore dark mode preference
@@ -4033,10 +4088,10 @@ if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark
 
 rebuildProducts(); renderAll();
 ['tab-ordenes','tab-dashboard','tab-clientes','tab-catalogo','tab-ajustes'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-// Show despacho tab by default
-const startTab = document.getElementById('tab-despacho');
-if(startTab) startTab.style.display = 'block';
-document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='despacho'));
+// Show catalogo tab by default
+const startTab = document.getElementById('tab-catalogo');
+if(startTab) startTab.style.display = 'flex';
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='catalogo'));
 
 setSyncState('', 'Inicia sesión para sincronizar');
 document.getElementById('overlay').classList.remove('hidden');
