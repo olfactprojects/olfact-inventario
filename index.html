@@ -756,7 +756,10 @@ tr:hover td{background:rgba(33,60,78,0.02)}
         <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Layers Armonicos</div>
         <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:3px">Combinaciones curadas - el primer servicio de Layering en Mexico</div>
       </div>
-      <button class="btn-primary" onclick="showCreateLayer()">+ Crear Layer</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" onclick="openBundleBuilder()">&#x1F381; Bundle Builder</button>
+        <button class="btn-primary" onclick="showCreateLayer()">+ Crear Layer</button>
+      </div>
     </div>
     <div id="layer-form-wrap" style="display:none;margin-bottom:20px">
       <div class="form-card">
@@ -822,7 +825,10 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   <div style="padding:24px 32px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Catalogo Completo</div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)" id="catalogo-count"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)" id="catalogo-count"></div>
+        <button class="btn-secondary" style="font-size:10px;padding:5px 12px" onclick="openInstagramGenerator()">&#x1F4F8; Generar post IG</button>
+      </div>
     </div>
     <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;background:var(--white);border:1px solid var(--border-mid);border-radius:10px;padding:14px">
       <div style="flex:1;min-width:180px">
@@ -860,7 +866,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
       <table>
         <thead><tr>
           <th>Fragancia</th><th>Casa</th><th>Categoria</th><th>ml botella</th>
-          <th>Stock actual</th><th>P2ml</th><th>P5ml</th><th>P10ml</th><th>Margen</th><th>Ventas (ml)</th>
+          <th>Stock actual</th><th>Costo botella</th><th>P10ml</th><th>Competencia 10ml</th><th>Diferencia</th><th>Margen</th><th>Ventas (ml)</th><th>Editar</th>
         </tr></thead>
         <tbody id="catalogo-tbody"></tbody>
       </table>
@@ -876,6 +882,139 @@ tr:hover td{background:rgba(33,60,78,0.02)}
       <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">&#x2715;</button>
     </div>
     <div class="modal-body" id="modal-cust-body"></div>
+  </div>
+</div>
+
+
+<!-- CATALOG EDIT MODAL -->
+<div class="modal-overlay hidden" id="catalog-edit-modal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="cem-title">Editar fragancia</div>
+      <button class="modal-close" onclick="document.getElementById('catalog-edit-modal').classList.add('hidden')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-bottom:16px" id="cem-subtitle"></div>
+
+      <div class="form-divider">Costo de la botella</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg">
+          <label>Precio que pague por la botella (MXN)</label>
+          <input class="finput" type="number" id="cem-bottle-price" placeholder="0" min="0" step="10">
+        </div>
+        <div class="fg">
+          <label>ml de la botella</label>
+          <input class="finput" type="number" id="cem-bottle-ml" placeholder="100" min="1" step="0.1" readonly style="opacity:0.6">
+        </div>
+      </div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted);margin-bottom:14px">
+        Costo/ml calculado: <strong id="cem-costo-preview" style="color:var(--text)">—</strong>
+      </div>
+
+      <div class="form-divider">Margen de ganancia</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <input type="range" class="range-slider" id="cem-margin-slider" min="20" max="150" value="70" style="flex:1">
+        <input type="number" class="finput" id="cem-margin-input" value="70" min="20" max="150" style="width:70px;text-align:center">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)">%</span>
+      </div>
+
+      <div class="form-divider">Precios resultantes</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">2ml</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--green)" id="cem-p2">—</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:3px" id="cem-break2">— para recuperar</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">5ml</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--green)" id="cem-p5">—</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:3px" id="cem-break5">— para recuperar</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">10ml</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--green)" id="cem-p10">—</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:3px" id="cem-break10">— para recuperar</div>
+        </div>
+      </div>
+
+      <div class="form-divider">Simulador de precio</div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--slate);margin-bottom:8px">¿Qué pasa si bajo el precio del 10ml un <input type="number" id="cem-discount" value="10" min="1" max="50" style="width:44px;padding:2px 4px;border:1px solid var(--border-mid);border-radius:3px;font-size:11px;text-align:center">%?</div>
+        <div id="cem-sim-result" style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text)">—</div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="saveCatalogEdit()">Guardar cambios</button>
+        <button class="btn-secondary" onclick="document.getElementById('catalog-edit-modal').classList.add('hidden')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- INSTAGRAM POST MODAL -->
+<div class="modal-overlay hidden" id="insta-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">Generar post para Instagram</div>
+      <button class="modal-close" onclick="document.getElementById('insta-modal').classList.add('hidden')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--slate);margin-bottom:12px">Selecciona una fragancia y estilo, y genera el texto listo para copiar.</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+        <div class="fg">
+          <label>Fragancia</label>
+          <select class="fselect" id="ig-fragrance"><option value="">Seleccionar...</option></select>
+        </div>
+        <div class="fg">
+          <label>Estilo del post</label>
+          <select class="fselect" id="ig-style">
+            <option value="disponible">Disponible ahora</option>
+            <option value="destacado">Fragancia destacada</option>
+            <option value="recomendacion">Recomendacion de clima</option>
+            <option value="precio">Enfoque en precio</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:12px">
+        <label>Notas adicionales (opcional)</label>
+        <input class="finput" id="ig-notes" placeholder="ej. perfecta para verano, ultima botella...">
+      </div>
+      <button class="btn-primary" onclick="generateInstagramPost()" style="margin-bottom:14px">Generar texto</button>
+      <div id="ig-result" style="display:none">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:8px">Texto generado</div>
+        <div id="ig-text" style="background:var(--bg);border:1px solid var(--border-mid);border-radius:8px;padding:14px;font-family:'Raleway',sans-serif;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;max-height:300px;overflow-y:auto"></div>
+        <button class="btn-secondary" onclick="copyInstagramPost()" style="margin-top:10px;width:100%">Copiar al portapapeles</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUNDLE BUILDER MODAL -->
+<div class="modal-overlay hidden" id="bundle-modal">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">Armar Bundle Tematico</div>
+      <button class="modal-close" onclick="document.getElementById('bundle-modal').classList.add('hidden')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--slate);margin-bottom:14px">Crea packs tematicos con descuento para vender en conjunto.</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+        <div class="fg"><label>Nombre del bundle</label><input class="finput" id="bun-name" placeholder="ej. Verano de playa"></div>
+        <div class="fg"><label>Descuento del bundle (%)</label><input class="finput" type="number" id="bun-discount" value="10" min="0" max="50"></div>
+      </div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:8px">Fragancias del bundle</div>
+      <div id="bun-items" style="margin-bottom:10px"></div>
+      <button class="btn-secondary" onclick="addBundleItem()" style="margin-bottom:14px;width:100%">+ Agregar fragancia</button>
+      <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:14px" id="bun-summary">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--slate)">Agrega fragancias para ver el resumen</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="saveBundleAsLayer()">Guardar como Layer</button>
+        <button class="btn-secondary" onclick="copyBundlePost()">Copiar texto IG</button>
+        <button class="btn-secondary" onclick="document.getElementById('bundle-modal').classList.add('hidden')">Cancelar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2398,17 +2537,36 @@ function renderCatalog(){
   tbody.innerHTML=prods.map(p=>{
     const sl=p.ml_disponibles<2?'out':p.ml_disponibles<20?'crit':p.ml_disponibles<40?'low':'ok';
     const sc=sl==='out'||sl==='crit'?'var(--red)':sl==='low'?'var(--amber)':'var(--green)';
-    return `<tr onclick="switchTab('inventory');state.selected=${p.id};renderList();renderDetail();" style="cursor:pointer">
-      <td><div style="font-weight:500;font-size:12px">${p.nombre}</div><div style="font-size:10px;color:var(--muted);font-style:italic">${p.concentracion||''}</div></td>
+    const costoMl = p.costo_ml||0;
+    const precioBottle = costoMl * p.ml_inicial;
+    const compPrice = state.competitorPrices?.[p.id]||0;
+    const diff = compPrice > 0 ? p.p10ml - compPrice : null;
+    const diffColor = diff===null?'var(--muted)':diff>0?'var(--red)':'var(--green)';
+    const diffText = diff===null?'—':diff>0?'+'+ fmt(diff)+' mas caro': fmt(Math.abs(diff))+' mas barato';
+    return `<tr style="cursor:default">
+      <td onclick="switchTab('inventory');state.selected=${p.id};renderList();renderDetail();" style="cursor:pointer">
+        <div style="font-weight:500;font-size:12px">${p.nombre}</div>
+        <div style="font-size:10px;color:var(--muted);font-style:italic">${p.concentracion||''}</div>
+      </td>
       <td style="font-size:11px">${p.casa}</td>
       <td><span class="badge badge-navy" style="font-size:9px">${(p.categoria||'').replace('Nicho Accesible / Arabe','Arabe').replace('Disenador ','Dis. ')}</span></td>
       <td style="font-size:12px;color:var(--muted)">${p.ml_inicial?.toFixed(0)||''}ml</td>
       <td style="font-size:12px;font-weight:600;color:${sc}">${p.ml_disponibles?.toFixed(1)||''}ml</td>
-      <td class="td-green">${fmt(p.p2ml)}</td>
-      <td class="td-green">${fmt(p.p5ml)}</td>
-      <td class="td-green">${fmt(p.p10ml)}</td>
+      <td style="font-size:11px">
+        <div style="font-weight:600;color:var(--text)">${fmt(Math.round(precioBottle))}</div>
+        <div style="font-size:10px;color:var(--slate)">${costoMl.toFixed(2)}/ml</div>
+      </td>
+      <td class="td-green" style="font-weight:700">${fmt(p.p10ml)}</td>
+      <td>
+        <input type="number" value="${compPrice||''}" placeholder="0"
+          style="width:80px;padding:3px 6px;border:1px solid var(--border-mid);border-radius:4px;font-size:11px;background:var(--bg);color:var(--text);outline:none"
+          onchange="setCompetitorPrice(${p.id}, this.value)"
+          onclick="event.stopPropagation()">
+      </td>
+      <td style="font-size:11px;font-weight:600;color:${diffColor}">${diffText}</td>
       <td style="font-size:11px;font-weight:600;color:var(--blue)">${Math.round((p.margen||0)*100)}%</td>
       <td style="font-size:11px;color:var(--muted)">${p.totalMlSold>0?p.totalMlSold.toFixed(1)+'ml':'-'}</td>
+      <td><button class="btn-secondary" style="padding:3px 8px;font-size:10px" onclick="openCatalogEdit(${p.id})">Editar</button></td>
     </tr>`;
   }).join('');
 }
@@ -2467,6 +2625,379 @@ function openCustomerModal(key){
 }
 document.getElementById('cust-modal').addEventListener('click',e=>{if(e.target===document.getElementById('cust-modal'))document.getElementById('cust-modal').classList.add('hidden');});
 document.getElementById('layer-order-modal').addEventListener('click',e=>{if(e.target===document.getElementById('layer-order-modal'))document.getElementById('layer-order-modal').classList.add('hidden');});
+
+
+// CATALOG EDIT
+let catalogEditId = null;
+const CEIL5 = v => Math.ceil(v/5)*5;
+const CAT_FLOOR = {'Diseñador Accesible':{2:50,5:100,10:180},'Diseñador Premium':{2:50,5:100,10:180},'Nicho Medio':{2:50,5:100,10:180},'Nicho Accesible / Árabe':{2:50,5:100,10:180}};
+
+function calcCatalogPrices(costoMl, margen, categoria) {
+  const vm = costoMl * (1 + margen/100);
+  const floor = CAT_FLOOR[categoria] || {2:0,5:0,10:0};
+  return {
+    p2: Math.max(floor[2], CEIL5(vm*2)),
+    p5: Math.max(floor[5], CEIL5(vm*5)),
+    p10: Math.max(floor[10], CEIL5(vm*10)),
+  };
+}
+
+function updateCatalogEditPreview() {
+  const bottlePrice = parseFloat(document.getElementById('cem-bottle-price').value)||0;
+  const bottleMl = parseFloat(document.getElementById('cem-bottle-ml').value)||1;
+  const margen = parseFloat(document.getElementById('cem-margin-input').value)||70;
+  const costoMl = bottlePrice / bottleMl;
+  document.getElementById('cem-costo-preview').textContent = '$' + costoMl.toFixed(2) + ' MXN/ml';
+  const p = CATALOG.find(x=>x.id===catalogEditId);
+  if(!p) return;
+  const prices = calcCatalogPrices(costoMl, margen, p.categoria);
+  document.getElementById('cem-p2').textContent = fmt(prices.p2);
+  document.getElementById('cem-p5').textContent = fmt(prices.p5);
+  document.getElementById('cem-p10').textContent = fmt(prices.p10);
+
+  // Breakeven: how many decants to recover bottle cost
+  if(bottlePrice > 0) {
+    const costoFrasc2 = state.costs[2]||0, costoFrasc5 = state.costs[5]||0, costoFrasc10 = state.costs[10]||0;
+    const util2 = prices.p2 - costoFrasc2 - (costoMl*2) - (state.costs.pack||0);
+    const util5 = prices.p5 - costoFrasc5 - (costoMl*5) - (state.costs.pack||0);
+    const util10 = prices.p10 - costoFrasc10 - (costoMl*10) - (state.costs.pack||0);
+    const br2 = util2>0 ? Math.ceil(bottlePrice/util2) : '∞';
+    const br5 = util5>0 ? Math.ceil(bottlePrice/util5) : '∞';
+    const br10 = util10>0 ? Math.ceil(bottlePrice/util10) : '∞';
+    document.getElementById('cem-break2').textContent = br2 + ' decants para recuperar';
+    document.getElementById('cem-break5').textContent = br5 + ' decants para recuperar';
+    document.getElementById('cem-break10').textContent = br10 + ' decants para recuperar';
+  }
+
+  // Price simulator: what if I lower 10ml price by X%
+  const discountEl = document.getElementById('cem-discount');
+  if(discountEl) {
+    const disc = parseFloat(discountEl.value)||10;
+    const simPrice = Math.round(prices.p10 * (1 - disc/100) / 5) * 5;
+    const simCostoMl10 = costoMl * 10;
+    const simUtil = simPrice - (state.costs[10]||0) - simCostoMl10 - (state.costs.pack||0);
+    const origUtil = prices.p10 - (state.costs[10]||0) - simCostoMl10 - (state.costs.pack||0);
+    const simRes = document.getElementById('cem-sim-result');
+    if(simRes) simRes.innerHTML =
+      '<span style="color:var(--navy);font-weight:600">Precio: ' + fmt(simPrice) + '</span> · '
+      + 'Utilidad: <span style="color:' + (simUtil>0?'var(--green)':'var(--red)') + ';font-weight:600">' + fmt(simUtil) + '</span> vs ' + fmt(origUtil) + ' actual · '
+      + (simUtil>0 ? 'Aún rentable ✓' : 'Bajo punto de equilibrio ✗');
+  }
+}
+
+function openCatalogEdit(id) {
+  const p = CATALOG.find(x=>x.id===id);
+  if(!p) return;
+  catalogEditId = id;
+  document.getElementById('cem-title').textContent = p.nombre;
+  document.getElementById('cem-subtitle').textContent = p.casa + ' · ' + p.ml_inicial.toFixed(0) + 'ml · ' + p.categoria;
+  document.getElementById('cem-bottle-ml').value = p.ml_inicial.toFixed(1);
+  // Current bottle price = costo_ml * ml_inicial
+  const currentBottlePrice = Math.round((p.costo_ml||0) * p.ml_inicial);
+  document.getElementById('cem-bottle-price').value = currentBottlePrice || '';
+  const currentMargen = Math.round(((state.margins[id]!=null?state.margins[id]:p.margen_base)||p.margen_base)*100);
+  document.getElementById('cem-margin-slider').value = currentMargen;
+  document.getElementById('cem-margin-input').value = currentMargen;
+  updateCatalogEditPreview();
+  document.getElementById('catalog-edit-modal').classList.remove('hidden');
+}
+
+async function saveCatalogEdit() {
+  const p = CATALOG.find(x=>x.id===catalogEditId);
+  if(!p) return;
+  const bottlePrice = parseFloat(document.getElementById('cem-bottle-price').value)||0;
+  const bottleMl = parseFloat(document.getElementById('cem-bottle-ml').value)||1;
+  const margen = parseFloat(document.getElementById('cem-margin-input').value)||70;
+  if(bottlePrice<=0){alert('Ingresa el precio que pagaste por la botella');return;}
+  const newCostoMl = bottlePrice / bottleMl;
+  const prices = calcCatalogPrices(newCostoMl, margen, p.categoria);
+  // Log price change history
+  logPriceChange(catalogEditId, p.nombre, p.p10ml, prices.p10, p.costo_ml||0, newCostoMl);
+  // Update CATALOG entry
+  p.costo_ml = Math.round(newCostoMl*100)/100;
+  p.p2ml = prices.p2;
+  p.p5ml = prices.p5;
+  p.p10ml = prices.p10;
+  // Update margins state
+  state.margins[catalogEditId] = margen/100;
+  // Save margin to Sheets if connected
+  if(state.accessToken) {
+    setSyncState('syncing','Guardando...');
+    try {
+      await saveMargins();
+    } catch(e) { setSyncState('error','Error: '+e.message); }
+  }
+  rebuildProducts();
+  renderCatalog();
+  document.getElementById('catalog-edit-modal').classList.add('hidden');
+  toast('Precios actualizados', p.nombre + ' — 10ml: ' + fmt(prices.p10), 'success');
+}
+
+// Wire edit modal listeners
+document.getElementById('cem-bottle-price').addEventListener('input', updateCatalogEditPreview);
+document.getElementById('cem-discount').addEventListener('input', updateCatalogEditPreview);
+document.getElementById('cem-margin-slider').addEventListener('input', ()=>{
+  document.getElementById('cem-margin-input').value = document.getElementById('cem-margin-slider').value;
+  updateCatalogEditPreview();
+});
+document.getElementById('cem-margin-input').addEventListener('input', ()=>{
+  document.getElementById('cem-margin-slider').value = document.getElementById('cem-margin-input').value;
+  updateCatalogEditPreview();
+});
+document.getElementById('catalog-edit-modal').addEventListener('click', e=>{
+  if(e.target===document.getElementById('catalog-edit-modal')) document.getElementById('catalog-edit-modal').classList.add('hidden');
+});
+
+
+// ═══════════════════════════════════════
+// COMPETITOR PRICES
+// ═══════════════════════════════════════
+if(!state.competitorPrices) state.competitorPrices = JSON.parse(localStorage.getItem('olfact_comp')||'{}');
+// Convert keys to numbers after JSON parse
+state.competitorPrices = Object.fromEntries(Object.entries(state.competitorPrices).map(([k,v])=>[parseInt(k),v]));
+
+function setCompetitorPrice(id, val) {
+  const price = parseFloat(val)||0;
+  if(price > 0) state.competitorPrices[id] = price;
+  else delete state.competitorPrices[id];
+  localStorage.setItem('olfact_comp', JSON.stringify(state.competitorPrices));
+  renderCatalog();
+}
+
+// ═══════════════════════════════════════
+// INSTAGRAM POST GENERATOR
+// ═══════════════════════════════════════
+function openInstagramGenerator() {
+  const sel = document.getElementById('ig-fragrance');
+  if(sel && sel.options.length <= 1) {
+    [...state.products].sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p.nombre + ' (' + p.casa + ')';
+      sel.appendChild(o);
+    });
+  }
+  document.getElementById('ig-result').style.display = 'none';
+  document.getElementById('insta-modal').classList.remove('hidden');
+}
+
+function generateInstagramPost() {
+  const pid = parseInt(document.getElementById('ig-fragrance').value);
+  const style = document.getElementById('ig-style').value;
+  const notes = document.getElementById('ig-notes').value.trim();
+  if(!pid) { alert('Selecciona una fragancia'); return; }
+  const p = state.products.find(x=>x.id===pid);
+  if(!p) return;
+
+  const hashtags = [
+    '#Perfume', '#Decants', '#Fragrances', '#NichoMexico',
+    '#' + p.casa.replace(/[^a-zA-Z]/g,''),
+    '#PerfumeMexico', '#Guadalajara', '#OLFACT',
+    '#DecantsMexico', '#PerfumesDeNicho'
+  ].join(' ');
+
+  const priceInfo = `2ml: ${fmt(p.p2ml)} | 5ml: ${fmt(p.p5ml)} | 10ml: ${fmt(p.p10ml)}`;
+  const stockInfo = p.ml_disponibles > 0 ? 'Disponible ahora' : 'Agotado - lista de espera';
+
+  let body = '';
+  if(style === 'disponible') {
+    body = `✨ ${p.nombre.toUpperCase()} - ${p.casa}
+
+Una de las fragancias mas buscadas en nuestra coleccion, ahora disponible en decants para que la pruebes antes de invertir en una botella completa.
+
+${p.concentracion} | ${p.ml_inicial.toFixed(0)}ml original
+
+💧 Disponible en:
+${priceInfo}
+
+${notes ? '📝 ' + notes + '\n\n' : ''}📦 Envio a toda la Republica Mexicana
+💬 DM para hacer tu pedido
+
+${stockInfo} | @olfact.official
+
+${hashtags}`;
+  } else if(style === 'destacado') {
+    body = `🔥 FRAGANCIA DESTACADA DE LA SEMANA
+
+${p.nombre} de ${p.casa}
+
+${p.concentracion} — Una firma inconfundible que te hara destacar en cualquier ocasion.
+
+${notes ? notes + '\n\n' : ''}💰 Precios por decant:
+${priceInfo}
+
+Escríbenos por DM y te asesoramos personalizado.
+Enviamos a toda Mexico 🇲🇽
+
+${hashtags} #FraganciaDestacada`;
+  } else if(style === 'recomendacion') {
+    body = `🌡 RECOMENDACION OLFACT
+
+Para el clima de esta semana, recomendamos:
+
+${p.nombre} — ${p.casa}
+${p.concentracion}
+
+${notes ? notes + '\n\n' : ''}Una fragancia que se adapta perfecto a las condiciones actuales. Fresca, intensa y de larga duracion.
+
+Pruebala desde ${fmt(p.p2ml)} en decant de 2ml.
+
+DM para pedidos 📦 | ${hashtags}`;
+  } else {
+    body = `💎 ${p.nombre} - ${p.casa}
+
+Ahora lo tienes disponible en decants a precios accesibles:
+
+${priceInfo}
+
+${notes ? notes + '\n\n' : ''}Sin necesidad de comprar la botella completa. Prueba antes de invertir.
+
+🚚 Envio express a toda Mexico
+📲 Pedidos por DM
+
+@olfact.official | ${hashtags}`;
+  }
+
+  document.getElementById('ig-text').textContent = body;
+  document.getElementById('ig-result').style.display = 'block';
+}
+
+function copyInstagramPost() {
+  const text = document.getElementById('ig-text').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('Copiado','Texto listo para pegar en Instagram','success',3000));
+}
+
+// ═══════════════════════════════════════
+// BUNDLE BUILDER
+// ═══════════════════════════════════════
+let bundleItems = [];
+
+function openBundleBuilder() {
+  bundleItems = [];
+  renderBundleItems();
+  document.getElementById('bun-name').value = '';
+  document.getElementById('bun-discount').value = '10';
+  document.getElementById('bundle-modal').classList.remove('hidden');
+}
+
+function addBundleItem() {
+  bundleItems.push({id: null, size: 5});
+  renderBundleItems();
+}
+
+function removeBundleItem(idx) {
+  bundleItems.splice(idx, 1);
+  renderBundleItems();
+}
+
+function renderBundleItems() {
+  const wrap = document.getElementById('bun-items');
+  if(!bundleItems.length) {
+    wrap.innerHTML = '<div style="font-family:Raleway,sans-serif;font-style:italic;font-size:12px;color:var(--muted);padding:8px 0">Sin fragancias aun. Haz clic en + Agregar.</div>';
+    updateBundleSummary();
+    return;
+  }
+  wrap.innerHTML = bundleItems.map((item, i) => `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <select class="fselect" style="flex:1" onchange="bundleItems[${i}].id=parseInt(this.value);updateBundleSummary()">
+        <option value="">Seleccionar...</option>
+        ${[...state.products].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>`<option value="${p.id}" ${item.id===p.id?'selected':''}>${p.nombre} (${p.casa})</option>`).join('')}
+      </select>
+      <select class="fselect" style="width:80px" onchange="bundleItems[${i}].size=parseInt(this.value);updateBundleSummary()">
+        <option value="2" ${item.size===2?'selected':''}>2ml</option>
+        <option value="5" ${item.size===5?'selected':''}>5ml</option>
+        <option value="10" ${item.size===10?'selected':''}>10ml</option>
+      </select>
+      <button class="btn-danger" style="padding:4px 8px;flex-shrink:0" onclick="removeBundleItem(${i})">✕</button>
+    </div>`).join('');
+  updateBundleSummary();
+}
+
+function updateBundleSummary() {
+  const discount = parseFloat(document.getElementById('bun-discount').value)||0;
+  const validItems = bundleItems.filter(x=>x.id);
+  const summary = document.getElementById('bun-summary');
+  if(!validItems.length) {
+    summary.innerHTML = '<div style="font-size:11px;color:var(--slate)">Agrega fragancias para ver el resumen</div>';
+    return;
+  }
+  let totalOriginal = 0;
+  const lines = validItems.map(item => {
+    const p = state.products.find(x=>x.id===item.id);
+    if(!p) return '';
+    const price = {2:p.p2ml,5:p.p5ml,10:p.p10ml}[item.size]||0;
+    totalOriginal += price;
+    return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${p.nombre} ${item.size}ml</span><span style="color:var(--green)">${fmt(price)}</span></div>`;
+  });
+  const bundlePrice = Math.round(totalOriginal * (1 - discount/100) / 5) * 5;
+  const saving = totalOriginal - bundlePrice;
+  summary.innerHTML = lines.join('') +
+    `<div style="display:flex;justify-content:space-between;padding:8px 0 4px;font-size:12px;color:var(--muted)"><span>Precio individual total</span><span>${fmt(totalOriginal)}</span></div>` +
+    `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;font-weight:600;color:var(--green)"><span>Precio bundle (${discount}% desc.)</span><span>${fmt(bundlePrice)}</span></div>` +
+    `<div style="font-size:11px;color:var(--blue);margin-top:4px">El cliente ahorra ${fmt(saving)}</div>`;
+}
+
+function saveBundleAsLayer() {
+  const name = document.getElementById('bun-name').value.trim();
+  const discount = parseFloat(document.getElementById('bun-discount').value)||10;
+  const validItems = bundleItems.filter(x=>x.id);
+  if(!name) { alert('Ponle nombre al bundle'); return; }
+  if(validItems.length < 2) { alert('Agrega al menos 2 fragancias'); return; }
+  const totalOriginal = validItems.reduce((s,item)=>{
+    const p=state.products.find(x=>x.id===item.id);
+    return s+({2:p?.p2ml,5:p?.p5ml,10:p?.p10ml}[item.size]||0);
+  }, 0);
+  const bundlePrice = Math.round(totalOriginal * (1 - discount/100) / 5) * 5;
+  // Save as Layer (first 2 items)
+  const l = {
+    id: 'layer-'+Date.now(), name, desc: 'Bundle tematico con ' + discount + '% de descuento.',
+    occasion: '', climate: '',
+    frag1_id: validItems[0].id, frag1_size: validItems[0].size,
+    frag2_id: validItems[1].id, frag2_size: validItems[1].size,
+    price: bundlePrice, enabled: true
+  };
+  layersData.push(l);
+  document.getElementById('bundle-modal').classList.add('hidden');
+  switchTab('layers');
+  toast('Bundle guardado como Layer', name + ' - ' + fmt(bundlePrice), 'success');
+}
+
+function copyBundlePost() {
+  const name = document.getElementById('bun-name').value.trim()||'Bundle especial';
+  const discount = parseFloat(document.getElementById('bun-discount').value)||10;
+  const validItems = bundleItems.filter(x=>x.id);
+  if(!validItems.length) { alert('Agrega fragancias primero'); return; }
+  const totalOriginal = validItems.reduce((s,item)=>{
+    const p=state.products.find(x=>x.id===item.id);
+    return s+({2:p?.p2ml,5:p?.p5ml,10:p?.p10ml}[item.size]||0);
+  }, 0);
+  const bundlePrice = Math.round(totalOriginal * (1 - discount/100) / 5) * 5;
+  const itemLines = validItems.map(item=>{
+    const p=state.products.find(x=>x.id===item.id);
+    return '• ' + p.nombre + ' (' + p.casa + ') ' + item.size + 'ml';
+  }).join('\n');
+  const text = `🎁 BUNDLE: ${name.toUpperCase()}\n\nIncluy e:\n${itemLines}\n\nPrecio individual: ${fmt(totalOriginal)}\nPrecio bundle: ${fmt(bundlePrice)} (ahorras ${fmt(totalOriginal-bundlePrice)})\n\nDM para pedidos 📦 | @olfact.official\n#OLFACT #DecantsMexico #PerfumesDeNicho #Guadalajara`;
+  navigator.clipboard.writeText(text).then(()=>toast('Copiado','Texto del bundle listo para Instagram','success',3000));
+}
+
+// Wire bundle discount input
+document.getElementById('bun-discount').addEventListener('input', updateBundleSummary);
+document.getElementById('bundle-modal').addEventListener('click', e=>{if(e.target===document.getElementById('bundle-modal'))document.getElementById('bundle-modal').classList.add('hidden');});
+document.getElementById('insta-modal').addEventListener('click', e=>{if(e.target===document.getElementById('insta-modal'))document.getElementById('insta-modal').classList.add('hidden');});
+
+// ═══════════════════════════════════════
+// PRICE HISTORY (localStorage)
+// ═══════════════════════════════════════
+function logPriceChange(id, nombre, oldP10, newP10, oldCosto, newCosto) {
+  const history = JSON.parse(localStorage.getItem('olfact_price_history')||'[]');
+  history.unshift({
+    date: new Date().toISOString().split('T')[0],
+    id, nombre, oldP10, newP10, oldCosto, newCosto,
+    change: newP10 - oldP10
+  });
+  // Keep last 100 entries
+  localStorage.setItem('olfact_price_history', JSON.stringify(history.slice(0,100)));
+}
 
 // BOOT
 // ═══════════════════════════════════════
