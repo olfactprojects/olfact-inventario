@@ -559,6 +559,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   <button class="tab-btn" data-tab="settings">⚙️ Ajustes</button>
   <button class="tab-btn" data-tab="layers">🎵 Layers</button>
   <button class="tab-btn" data-tab="catalogo">📋 Catálogo</button>
+  <button class="tab-btn" data-tab="pricing">💹 Precios</button>
 </div>
 
 <!-- TAB: INVENTORY -->
@@ -1015,6 +1016,133 @@ tr:hover td{background:rgba(33,60,78,0.02)}
         <button class="btn-secondary" onclick="document.getElementById('bundle-modal').classList.add('hidden')">Cancelar</button>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- TAB: PRICING SIMULATOR -->
+<div id="tab-pricing" style="display:none">
+  <div style="padding:24px 32px;max-width:1100px">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Simulador de Precios</div>
+        <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:3px">Analisis de rentabilidad en tiempo real — mueve el slider y ve el impacto</div>
+      </div>
+    </div>
+
+    <!-- Fragrance selector -->
+    <div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:18px;margin-bottom:20px">
+      <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">
+        <div class="fg" style="flex:1;min-width:220px">
+          <label>Seleccionar fragancia</label>
+          <select class="fselect" id="sim-fragrance" onchange="loadSimFragrance()">
+            <option value="">Elige una fragancia...</option>
+          </select>
+        </div>
+        <div class="fg" style="min-width:130px">
+          <label>Precio pagado por botella (MXN)</label>
+          <input class="finput" type="number" id="sim-bottle-cost" placeholder="0" oninput="updateSimulator()">
+        </div>
+        <div class="fg" style="min-width:110px">
+          <label>ml de la botella</label>
+          <input class="finput" type="number" id="sim-bottle-ml" placeholder="100" oninput="updateSimulator()">
+        </div>
+        <div class="fg" style="min-width:110px">
+          <label>Precio competencia 10ml</label>
+          <input class="finput" type="number" id="sim-comp-price" placeholder="0" oninput="updateSimulator()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Main grid: chart + controls -->
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;margin-bottom:20px">
+
+      <!-- CHART AREA -->
+      <div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text)">Utilidad neta por precio del 10ml</div>
+          <div style="display:flex;gap:6px">
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--green)"><span style="width:12px;height:3px;background:var(--green);border-radius:2px;display:inline-block"></span>Rentable</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--red)"><span style="width:12px;height:3px;background:var(--red);border-radius:2px;display:inline-block"></span>Perdida</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--blue)"><span style="width:10px;height:10px;background:rgba(26,95,168,0.2);border:1px solid var(--blue);border-radius:2px;display:inline-block"></span>Competencia</span>
+          </div>
+        </div>
+        <!-- SVG Chart -->
+        <div style="position:relative;user-select:none" id="sim-chart-wrap">
+          <canvas id="sim-chart" width="600" height="320" style="width:100%;height:320px;cursor:crosshair;border-radius:6px"></canvas>
+          <!-- Hover tooltip -->
+          <div id="sim-tooltip" style="position:absolute;display:none;background:var(--navy);color:var(--cream);padding:8px 12px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(33,60,78,0.3)">
+            <div id="sim-tt-price" style="font-weight:700;font-size:13px"></div>
+            <div id="sim-tt-util"></div>
+            <div id="sim-tt-margin"></div>
+          </div>
+        </div>
+        <!-- X-axis label -->
+        <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--slate);margin-top:6px;letter-spacing:0.1em">PRECIO DEL DECANT 10ml (MXN)</div>
+      </div>
+
+      <!-- CONTROLS + KPIs -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- Current price control -->
+        <div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:18px">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:12px">Precio simulado — 10ml</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;color:var(--text);line-height:1;margin-bottom:4px">
+            $<span id="sim-price-display">0</span>
+          </div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted);margin-bottom:14px" id="sim-vs-current">vs precio actual</div>
+          <input type="range" id="sim-slider" min="50" max="5000" value="500" step="5"
+            style="width:100%;accent-color:var(--navy);height:6px;cursor:pointer"
+            oninput="onSimSlider()">
+          <div style="display:flex;justify-content:space-between;font-family:'Space Grotesk',sans-serif;font-size:9px;color:var(--slate);margin-top:4px">
+            <span id="sim-min-label">$50</span>
+            <span id="sim-max-label">$5000</span>
+          </div>
+        </div>
+
+        <!-- KPI cards -->
+        <div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:16px">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:12px">Resultado</div>
+          <div id="sim-status-badge" style="padding:6px 12px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-align:center;margin-bottom:12px">—</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Utilidad neta</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700" id="sim-util">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Margen real</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700" id="sim-margin-pct">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">vs competencia</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700" id="sim-vs-comp">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Break-even</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700" id="sim-breakeven">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apply button -->
+        <button class="btn-primary" onclick="applySimulatorPrice()" id="sim-apply-btn" disabled
+          style="width:100%;padding:12px">
+          Aplicar este precio
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Price history table -->
+    <div style="background:var(--white);border:1px solid var(--border-mid);border-radius:12px;padding:18px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">Historial de cambios de precio</div>
+      <div id="sim-history-wrap">
+        <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted)">Sin cambios registrados aun. Los cambios se guardan localmente en este dispositivo.</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2249,8 +2377,8 @@ document.getElementById('btn-cmd').addEventListener('click',openCmd);
 let activeTab='inventory';
 function switchTab(tab) {
   activeTab=tab;
-  const displays={inventory:'grid',fulfill:'block',orders:'block',dashboard:'block',customers:'block',settings:'block',layers:'block',catalogo:'block'};
-  ['inventory','fulfill','orders','dashboard','customers','settings','layers','catalogo'].forEach(t=>{
+  const displays={inventory:'grid',fulfill:'block',orders:'block',dashboard:'block',customers:'block',settings:'block',layers:'block',catalogo:'block',pricing:'block'};
+  ['inventory','fulfill','orders','dashboard','customers','settings','layers','catalogo','pricing'].forEach(t=>{
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?displays[t]:'none';
   });
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
@@ -2261,6 +2389,7 @@ function switchTab(tab) {
   if(tab==='settings')  updateSettingsUI();
   if(tab==='layers')    renderLayers();
   if(tab==='catalogo')  renderCatalog();
+  if(tab==='pricing')   { renderPricingTab(); setTimeout(initSimChartEvents, 50); }
 }
 document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
 document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{
@@ -2999,6 +3128,457 @@ function logPriceChange(id, nombre, oldP10, newP10, oldCosto, newCosto) {
   localStorage.setItem('olfact_price_history', JSON.stringify(history.slice(0,100)));
 }
 
+
+// ═══════════════════════════════════════
+// PRICING SIMULATOR
+// ═══════════════════════════════════════
+let simState = {
+  fragId: null,
+  bottleCost: 0,
+  bottleMl: 100,
+  currentPrice: 500,
+  compPrice: 0,
+  chartPoints: [],
+};
+
+function renderPricingTab() {
+  // Populate fragrance selector
+  const sel = document.getElementById('sim-fragrance');
+  if(sel && sel.options.length <= 1) {
+    [...CATALOG].sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p.nombre + ' — ' + p.casa;
+      sel.appendChild(o);
+    });
+  }
+  renderSimHistory();
+}
+
+function loadSimFragrance() {
+  const id = parseInt(document.getElementById('sim-fragrance').value);
+  if(!id) return;
+  simState.fragId = id;
+  const p = CATALOG.find(x=>x.id===id);
+  if(!p) return;
+  // Pre-fill from catalog data
+  const bottleCost = Math.round((p.costo_ml||0) * p.ml_inicial);
+  document.getElementById('sim-bottle-cost').value = bottleCost || '';
+  document.getElementById('sim-bottle-ml').value = p.ml_inicial.toFixed(1);
+  // Pre-fill competitor price if saved
+  const compP = state.competitorPrices?.[id]||0;
+  document.getElementById('sim-comp-price').value = compP || '';
+  simState.bottleCost = bottleCost;
+  simState.bottleMl = p.ml_inicial;
+  simState.compPrice = compP;
+  simState.currentPrice = p.p10ml;
+  updateSimulator();
+}
+
+function calcUtil10(price, costoMl) {
+  const costoMl10 = costoMl * 10;
+  const frasquito = state.costs[10]||0;
+  const empaque = state.costs.pack||0;
+  return price - costoMl10 - frasquito - empaque;
+}
+
+function updateSimulator() {
+  const bottleCost = parseFloat(document.getElementById('sim-bottle-cost').value)||0;
+  const bottleMl = parseFloat(document.getElementById('sim-bottle-ml').value)||100;
+  const compPrice = parseFloat(document.getElementById('sim-comp-price').value)||0;
+  simState.bottleCost = bottleCost;
+  simState.bottleMl = bottleMl;
+  simState.compPrice = compPrice;
+  if(compPrice > 0) state.competitorPrices[simState.fragId] = compPrice;
+
+  const costoMl = bottleMl > 0 ? bottleCost / bottleMl : 0;
+  // Dynamic range: from near-zero to 3x breakeven or competitor
+  const minPrice = Math.max(50, Math.round(costoMl * 10 * 0.5 / 5) * 5);
+  const maxPrice = Math.max(minPrice + 500, Math.round(costoMl * 10 * 4 / 5) * 5, compPrice * 1.5 || 0, (simState.currentPrice||500) * 1.5);
+
+  const slider = document.getElementById('sim-slider');
+  slider.min = minPrice;
+  slider.max = maxPrice;
+  if(!simState.sliderSet || parseFloat(slider.value) < minPrice) {
+    slider.value = simState.currentPrice || Math.round(costoMl * 10 * 1.7 / 5) * 5;
+    simState.sliderSet = true;
+  }
+  document.getElementById('sim-min-label').textContent = '$' + minPrice.toLocaleString('es-MX');
+  document.getElementById('sim-max-label').textContent = '$' + maxPrice.toLocaleString('es-MX');
+
+  // Build chart data points
+  const steps = 80;
+  simState.chartPoints = [];
+  for(let i = 0; i <= steps; i++) {
+    const price = minPrice + (maxPrice - minPrice) * i / steps;
+    const util = calcUtil10(price, costoMl);
+    simState.chartPoints.push({price, util});
+  }
+  simState.minPrice = minPrice;
+  simState.maxPrice = maxPrice;
+  simState.costoMl = costoMl;
+
+  drawSimChart();
+  updateSimKPIs();
+}
+
+function onSimSlider() {
+  simState.currentPrice = parseFloat(document.getElementById('sim-slider').value);
+  document.getElementById('sim-price-display').textContent = Math.round(simState.currentPrice).toLocaleString('es-MX');
+  drawSimChart();
+  updateSimKPIs();
+}
+
+function updateSimKPIs() {
+  const price = simState.currentPrice;
+  const costoMl = simState.costoMl || 0;
+  const util = calcUtil10(price, costoMl);
+  const cost10 = costoMl * 10;
+  const marginPct = cost10 > 0 ? ((util / cost10) * 100) : 0;
+  const isProfit = util > 0;
+  const breakeven = util > 0 && simState.bottleCost > 0
+    ? Math.ceil(simState.bottleCost / util)
+    : null;
+
+  // Get original price from catalog
+  const origP = simState.fragId ? (CATALOG.find(x=>x.id===simState.fragId)?.p10ml||0) : 0;
+  const diffVsOrig = origP > 0 ? price - origP : 0;
+  const diffPct = origP > 0 ? ((diffVsOrig/origP)*100).toFixed(1) : 0;
+
+  document.getElementById('sim-price-display').textContent = Math.round(price).toLocaleString('es-MX');
+  document.getElementById('sim-vs-current').textContent = origP > 0
+    ? (diffVsOrig >= 0 ? '+' : '') + fmt(Math.round(diffVsOrig)) + ' vs precio actual (' + (diffVsOrig >= 0 ? '+' : '') + diffPct + '%)'
+    : 'Selecciona una fragancia';
+
+  const utilEl = document.getElementById('sim-util');
+  utilEl.textContent = fmt(Math.round(util));
+  utilEl.style.color = isProfit ? 'var(--green)' : 'var(--red)';
+
+  const marginEl = document.getElementById('sim-margin-pct');
+  marginEl.textContent = marginPct.toFixed(1) + '%';
+  marginEl.style.color = marginPct > 20 ? 'var(--green)' : marginPct > 0 ? 'var(--amber)' : 'var(--red)';
+
+  const badge = document.getElementById('sim-status-badge');
+  if(!simState.fragId || costoMl === 0) {
+    badge.textContent = 'Selecciona una fragancia';
+    badge.style.background = 'var(--bg)';
+    badge.style.color = 'var(--slate)';
+  } else if(util > 0 && marginPct > 30) {
+    badge.textContent = '✓ RENTABLE';
+    badge.style.background = 'rgba(45,122,82,0.12)';
+    badge.style.color = 'var(--green)';
+  } else if(util > 0) {
+    badge.textContent = '⚡ MARGEN BAJO';
+    badge.style.background = 'rgba(184,134,11,0.1)';
+    badge.style.color = 'var(--amber)';
+  } else {
+    badge.textContent = '✗ EN PERDIDA';
+    badge.style.background = 'rgba(192,57,43,0.1)';
+    badge.style.color = 'var(--red)';
+  }
+
+  const compEl = document.getElementById('sim-vs-comp');
+  if(simState.compPrice > 0) {
+    const diffComp = price - simState.compPrice;
+    compEl.textContent = (diffComp > 0 ? '+' : '') + fmt(Math.round(diffComp));
+    compEl.style.color = diffComp > 0 ? 'var(--red)' : 'var(--green)';
+    compEl.title = diffComp > 0 ? 'Estas mas caro que la competencia' : 'Estas mas barato que la competencia';
+  } else {
+    compEl.textContent = 'Sin dato';
+    compEl.style.color = 'var(--muted)';
+  }
+
+  const brEl = document.getElementById('sim-breakeven');
+  if(breakeven !== null) {
+    brEl.textContent = breakeven + ' decants';
+    brEl.style.color = breakeven < 20 ? 'var(--green)' : breakeven < 50 ? 'var(--amber)' : 'var(--red)';
+  } else {
+    brEl.textContent = 'N/A';
+    brEl.style.color = 'var(--muted)';
+  }
+
+  const applyBtn = document.getElementById('sim-apply-btn');
+  applyBtn.disabled = !simState.fragId || costoMl === 0;
+  applyBtn.textContent = 'Aplicar ' + fmt(Math.round(price)) + ' al catalogo';
+}
+
+function drawSimChart() {
+  const canvas = document.getElementById('sim-chart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 600;
+  const H = 320;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const pts = simState.chartPoints;
+  if(!pts.length) { ctx.clearRect(0,0,W,H); return; }
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bgColor = isDark ? '#213C4E' : '#FFFFFF';
+  const gridColor = isDark ? 'rgba(255,245,217,0.06)' : 'rgba(33,60,78,0.06)';
+  const textColor = isDark ? '#9BB0B8' : '#7B949C';
+  const zeroColor = isDark ? 'rgba(255,245,217,0.3)' : 'rgba(33,60,78,0.2)';
+
+  const PAD = {top:20, right:20, bottom:40, left:64};
+  const CW = W - PAD.left - PAD.right;
+  const CH = H - PAD.top - PAD.bottom;
+
+  // Value ranges
+  const utils = pts.map(p=>p.util);
+  const minUtil = Math.min(...utils, 0);
+  const maxUtil = Math.max(...utils, 0);
+  const utilRange = maxUtil - minUtil || 1;
+  const minP = pts[0].price, maxP = pts[pts.length-1].price;
+  const priceRange = maxP - minP || 1;
+
+  const toX = price => PAD.left + ((price - minP) / priceRange) * CW;
+  const toY = util => PAD.top + (1 - (util - minUtil) / utilRange) * CH;
+  const zeroY = toY(0);
+
+  // Background
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  for(let i=0; i<=5; i++) {
+    const y = PAD.top + (CH/5)*i;
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+CW,y); ctx.stroke();
+    const val = maxUtil - (utilRange/5)*i;
+    ctx.fillStyle = textColor;
+    ctx.font = '10px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText((val>=0?'$':'-$') + Math.abs(Math.round(val)).toLocaleString('es-MX'), PAD.left-6, y+4);
+  }
+  // X grid / labels
+  for(let i=0; i<=4; i++) {
+    const price = minP + (priceRange/4)*i;
+    const x = toX(price);
+    ctx.strokeStyle = gridColor;
+    ctx.beginPath(); ctx.moveTo(x,PAD.top); ctx.lineTo(x,PAD.top+CH); ctx.stroke();
+    ctx.fillStyle = textColor;
+    ctx.font = '10px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('$'+Math.round(price).toLocaleString('es-MX'), x, H-PAD.bottom+16);
+  }
+
+  // Zero line
+  if(zeroY >= PAD.top && zeroY <= PAD.top+CH) {
+    ctx.strokeStyle = zeroColor;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(PAD.left,zeroY); ctx.lineTo(PAD.left+CW,zeroY); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Competitor price vertical line
+  if(simState.compPrice > 0 && simState.compPrice >= minP && simState.compPrice <= maxP) {
+    const cx = toX(simState.compPrice);
+    ctx.strokeStyle = 'rgba(26,95,168,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6,3]);
+    ctx.beginPath(); ctx.moveTo(cx,PAD.top); ctx.lineTo(cx,PAD.top+CH); ctx.stroke();
+    ctx.setLineDash([]);
+    // Competitor zone shading
+    ctx.fillStyle = 'rgba(26,95,168,0.06)';
+    ctx.fillRect(cx-30, PAD.top, 60, CH);
+    // Label
+    ctx.fillStyle = 'rgba(26,95,168,0.8)';
+    ctx.font = 'bold 9px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('COMP', cx, PAD.top+12);
+  }
+
+  // Gradient fill (profit green / loss red)
+  for(let i=0; i<pts.length-1; i++) {
+    const x0=toX(pts[i].price), x1=toX(pts[i+1].price);
+    const y0=toY(pts[i].util), y1=toY(pts[i+1].util);
+    const isProfit = pts[i].util >= 0;
+    const grad = ctx.createLinearGradient(x0,0,x0,H);
+    if(isProfit) {
+      grad.addColorStop(0, 'rgba(45,122,82,0.15)');
+      grad.addColorStop(1, 'rgba(45,122,82,0.01)');
+    } else {
+      grad.addColorStop(0, 'rgba(192,57,43,0.01)');
+      grad.addColorStop(1, 'rgba(192,57,43,0.15)');
+    }
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(x0,zeroY); ctx.lineTo(x0,y0); ctx.lineTo(x1,y1); ctx.lineTo(x1,zeroY);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Main curve
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  // Draw profit segments green, loss segments red
+  let i=0;
+  while(i<pts.length-1) {
+    const startProfit = pts[i].util >= 0;
+    ctx.beginPath();
+    ctx.strokeStyle = startProfit ? '#2d7a52' : '#c0392b';
+    ctx.moveTo(toX(pts[i].price), toY(pts[i].util));
+    while(i<pts.length-1 && (pts[i+1].util >= 0) === startProfit) {
+      i++;
+      ctx.lineTo(toX(pts[i].price), toY(pts[i].util));
+    }
+    // Interpolate zero crossing
+    if(i<pts.length-1) {
+      const p0=pts[i], p1=pts[i+1];
+      const t = p0.util / (p0.util - p1.util);
+      const xCross = toX(p0.price + t*(p1.price-p0.price));
+      ctx.lineTo(xCross, toY(0));
+    }
+    ctx.stroke();
+  }
+
+  // Current price indicator (vertical + dot)
+  const simPrice = simState.currentPrice;
+  if(simPrice >= minP && simPrice <= maxP) {
+    const sx = toX(simPrice);
+    const costoMl = simState.costoMl || 0;
+    const util = calcUtil10(simPrice, costoMl);
+    const sy = toY(util);
+    // Vertical guide line
+    ctx.strokeStyle = 'rgba(33,60,78,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(sx,PAD.top); ctx.lineTo(sx,PAD.top+CH); ctx.stroke();
+    ctx.setLineDash([]);
+    // Glow dot
+    const dotColor = util >= 0 ? '#2d7a52' : '#c0392b';
+    ctx.shadowColor = dotColor;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = dotColor;
+    ctx.beginPath(); ctx.arc(sx, sy, 7, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI*2); ctx.fill();
+    // Price label above dot
+    ctx.fillStyle = isDark ? '#FFF5D9' : '#213C4E';
+    ctx.font = 'bold 11px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    const labelY = Math.max(PAD.top+18, sy-16);
+    ctx.fillText('$'+Math.round(simPrice).toLocaleString('es-MX'), sx, labelY);
+  }
+
+  // Attach mouse events
+  canvas._simBound = true;
+}
+
+// Mouse interaction on chart
+function initSimChartEvents() {
+  const canvas = document.getElementById('sim-chart');
+  if(!canvas || canvas._eventsSet) return;
+  canvas._eventsSet = true;
+  const tooltip = document.getElementById('sim-tooltip');
+
+  canvas.addEventListener('mousemove', e=>{
+    if(!simState.chartPoints.length) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const W = rect.width;
+    const PAD_LEFT = 64, PAD_RIGHT = 20;
+    const CW = W - PAD_LEFT - PAD_RIGHT;
+    const ratio = (mx - PAD_LEFT) / CW;
+    const price = simState.minPrice + ratio * (simState.maxPrice - simState.minPrice);
+    const clampedPrice = Math.max(simState.minPrice, Math.min(simState.maxPrice, Math.round(price/5)*5));
+
+    // Update slider + KPIs
+    document.getElementById('sim-slider').value = clampedPrice;
+    simState.currentPrice = clampedPrice;
+    drawSimChart();
+    updateSimKPIs();
+
+    // Tooltip
+    const costoMl = simState.costoMl || 0;
+    const util = calcUtil10(clampedPrice, costoMl);
+    const marginPct = costoMl > 0 ? ((util/(costoMl*10))*100).toFixed(1) : '—';
+    tooltip.style.display = 'block';
+    tooltip.style.left = Math.min(mx + 12, W - 160) + 'px';
+    tooltip.style.top = Math.max(8, e.clientY - rect.top - 40) + 'px';
+    document.getElementById('sim-tt-price').textContent = '$' + Math.round(clampedPrice).toLocaleString('es-MX');
+    document.getElementById('sim-tt-util').textContent = 'Utilidad: ' + fmt(Math.round(util));
+    document.getElementById('sim-tt-margin').textContent = 'Margen: ' + marginPct + '%';
+  });
+
+  canvas.addEventListener('mouseleave', ()=>{
+    if(tooltip) tooltip.style.display = 'none';
+  });
+
+  canvas.addEventListener('click', e=>{
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const W = rect.width;
+    const PAD_LEFT = 64, PAD_RIGHT = 20;
+    const CW = W - PAD_LEFT - PAD_RIGHT;
+    const ratio = (mx - PAD_LEFT) / CW;
+    const price = simState.minPrice + ratio * (simState.maxPrice - simState.minPrice);
+    simState.currentPrice = Math.max(simState.minPrice, Math.min(simState.maxPrice, Math.round(price/5)*5));
+    document.getElementById('sim-slider').value = simState.currentPrice;
+    drawSimChart();
+    updateSimKPIs();
+  });
+}
+
+function applySimulatorPrice() {
+  const id = simState.fragId;
+  if(!id) return;
+  const p = CATALOG.find(x=>x.id===id);
+  if(!p) return;
+  const newPrice10 = Math.round(simState.currentPrice/5)*5;
+  const costoMl = simState.costoMl||0;
+  // Keep ratio between sizes
+  const ratio = p.p10ml > 0 ? newPrice10/p.p10ml : 1;
+  logPriceChange(id, p.nombre, p.p10ml, newPrice10, p.costo_ml||0, costoMl);
+  p.costo_ml = Math.round(costoMl*100)/100;
+  p.p10ml = newPrice10;
+  p.p5ml = Math.max(100, Math.round(p.p5ml * ratio / 5) * 5);
+  p.p2ml = Math.max(50, Math.round(p.p2ml * ratio / 5) * 5);
+  if(simState.compPrice > 0 && state.competitorPrices) state.competitorPrices[id] = simState.compPrice;
+  if(state.margins) state.margins[id] = Math.round((newPrice10/(costoMl*10)-1)*100)/100;
+  rebuildProducts();
+  renderSimHistory();
+  toast('Precio aplicado', p.nombre + ' — 10ml: ' + fmt(newPrice10), 'success');
+}
+
+function renderSimHistory() {
+  const wrap = document.getElementById('sim-history-wrap');
+  if(!wrap) return;
+  const history = JSON.parse(localStorage.getItem('olfact_price_history')||'[]');
+  if(!history.length) {
+    wrap.innerHTML = '<div style="font-family:Raleway,sans-serif;font-style:italic;font-size:12px;color:var(--muted)">Sin cambios registrados aun.</div>';
+    return;
+  }
+  wrap.innerHTML = '<table style="width:100%;border-collapse:collapse">'
+    + '<thead><tr>'
+    + '<th style="padding:8px 12px;font-size:10px;color:var(--slate);text-align:left;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)">Fecha</th>'
+    + '<th style="padding:8px 12px;font-size:10px;color:var(--slate);text-align:left;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)">Fragancia</th>'
+    + '<th style="padding:8px 12px;font-size:10px;color:var(--slate);text-align:right;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)">Precio anterior</th>'
+    + '<th style="padding:8px 12px;font-size:10px;color:var(--slate);text-align:right;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)">Precio nuevo</th>'
+    + '<th style="padding:8px 12px;font-size:10px;color:var(--slate);text-align:right;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)">Cambio</th>'
+    + '</tr></thead><tbody>'
+    + history.map(h=>{
+      const change = h.change || (h.newP10 - h.oldP10);
+      return '<tr style="border-bottom:1px solid var(--border)">'
+        + '<td style="padding:8px 12px;font-size:11px;color:var(--muted)">' + h.date + '</td>'
+        + '<td style="padding:8px 12px;font-size:12px;font-weight:500">' + h.nombre + '</td>'
+        + '<td style="padding:8px 12px;font-size:12px;text-align:right;color:var(--muted)">' + fmt(h.oldP10) + '</td>'
+        + '<td style="padding:8px 12px;font-size:12px;text-align:right;font-weight:600;color:var(--green)">' + fmt(h.newP10) + '</td>'
+        + '<td style="padding:8px 12px;font-size:12px;text-align:right;font-weight:600;color:' + (change>=0?'var(--green)':'var(--red)') + '">'
+        + (change>=0?'+':'') + fmt(change) + '</td>'
+        + '</tr>';
+    }).join('')
+    + '</tbody></table>';
+}
+
+// Initialize chart events when pricing tab first loads
+const _origSwitchTab = switchTab;
+
 // BOOT
 // ═══════════════════════════════════════
 // Restore dark mode preference
@@ -3006,7 +3586,7 @@ const savedTheme=localStorage.getItem('olfact_dark');
 if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('btn-darkmode').textContent='☀️';}
 
 rebuildProducts(); renderAll();
-['tab-fulfill','tab-orders','tab-dashboard','tab-customers','tab-settings','tab-layers','tab-catalogo'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+['tab-fulfill','tab-orders','tab-dashboard','tab-customers','tab-settings','tab-layers','tab-catalogo','tab-pricing'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
 document.getElementById('tab-inventory').style.display='grid';
 
 setSyncState('', 'Inicia sesión para sincronizar');
