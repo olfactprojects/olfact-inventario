@@ -735,6 +735,150 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   </div>
 </div>
 
+
+
+<!-- CUSTOMER MODAL -->
+<div class="modal-overlay hidden" id="cust-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-cust-name">Cliente</div>
+      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-cust-body"></div>
+  </div>
+</div>
+
+<!-- TAB: LAYERS -->
+<div id="tab-layers" style="display:none">
+  <div style="padding:24px 32px;max-width:900px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Layers Armonicos</div>
+        <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:3px">Combinaciones curadas - el primer servicio de Layering en Mexico</div>
+      </div>
+      <button class="btn-primary" onclick="showCreateLayer()">+ Crear Layer</button>
+    </div>
+    <div id="layer-form-wrap" style="display:none;margin-bottom:20px">
+      <div class="form-card">
+        <div class="form-divider">Nueva combinacion</div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+          <div class="fg"><label>Nombre</label><input class="finput" id="ly-name" placeholder="ej. Desert Sunrise"></div>
+          <div class="fg"><label>Precio Bundle (MXN)</label><input class="finput" type="number" id="ly-price" placeholder="0"></div>
+        </div>
+        <div class="fg" style="margin-bottom:10px"><label>Descripcion</label><input class="finput" id="ly-desc" placeholder="Por que funcionan juntos..."></div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
+          <div class="fg"><label>Ocasion</label><input class="finput" id="ly-occasion" placeholder="ej. Noche de verano..."></div>
+          <div class="fg"><label>Clima</label><input class="finput" id="ly-climate" placeholder="ej. Calido y humedo..."></div>
+        </div>
+        <div class="form-divider">Fragancias</div>
+        <div class="form-row" style="grid-template-columns:2fr 1fr;margin-bottom:8px">
+          <div class="fg"><label>Fragancia 1</label><select class="fselect" id="ly-frag1"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Tamano</label><select class="fselect" id="ly-size1"><option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option></select></div>
+        </div>
+        <div class="form-row" style="grid-template-columns:2fr 1fr;margin-bottom:12px">
+          <div class="fg"><label>Fragancia 2</label><select class="fselect" id="ly-frag2"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Tamano</label><select class="fselect" id="ly-size2"><option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="saveLayer()">Guardar Layer</button>
+          <button class="btn-secondary" onclick="document.getElementById('layer-form-wrap').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div id="layers-list"></div>
+  </div>
+</div>
+
+<!-- LAYER ORDER MODAL -->
+<div class="modal-overlay hidden" id="layer-order-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="layer-modal-title">Vender Layer</div>
+      <button class="modal-close" onclick="document.getElementById('layer-order-modal').classList.add('hidden')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="layer-modal-summary" style="margin-bottom:16px"></div>
+      <div class="form-divider">Datos de la orden</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg"><label>Orden #</label><input class="finput" id="lom-ordernum" placeholder="MP-001"></div>
+        <div class="fg"><label>Fecha</label><input class="finput" type="date" id="lom-date"></div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
+        <div class="fg"><label>Nombre cliente</label><input class="finput" id="lom-name" placeholder="Nombre completo"></div>
+        <div class="fg"><label>Email</label><input class="finput" type="email" id="lom-email" placeholder="cliente@email.com"></div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+        <div class="fg"><label>Telefono</label><input class="finput" id="lom-phone" placeholder="+52 33..."></div>
+        <div class="fg"><label>Envio $</label><input class="finput" type="number" id="lom-shipping" placeholder="0"></div>
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label>Direccion</label><input class="finput" id="lom-address" placeholder="Calle, Colonia, Ciudad, CP"></div>
+      <button class="btn-primary" id="lom-btn" onclick="registerLayerOrder()">Registrar Orden de Layer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: CATALOGO -->
+<div id="tab-catalogo" style="display:none">
+  <div style="padding:24px 32px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Catalogo Completo</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)" id="catalogo-count"></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;background:var(--white);border:1px solid var(--border-mid);border-radius:10px;padding:14px">
+      <div style="flex:1;min-width:180px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Buscar</div>
+        <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" id="cat-search" type="text" placeholder="Nombre, codigo, casa..."></div>
+      </div>
+      <div style="min-width:150px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Casa</div>
+        <select class="fselect" id="cat-casa" style="width:100%"><option value="">Todas las casas</option></select>
+      </div>
+      <div style="min-width:150px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Categoria</div>
+        <select class="fselect" id="cat-cat" style="width:100%"><option value="">Todas</option></select>
+      </div>
+      <div style="min-width:180px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Ordenar por</div>
+        <select class="fselect" id="cat-sort" style="width:100%">
+          <option value="alpha-asc">Nombre A-Z</option>
+          <option value="alpha-desc">Nombre Z-A</option>
+          <option value="casa-asc">Casa A-Z</option>
+          <option value="stock-desc">Mayor stock</option>
+          <option value="stock-asc">Menor stock</option>
+          <option value="margin-desc">Mayor margen</option>
+          <option value="margin-asc">Menor margen</option>
+          <option value="price-desc">Mayor precio (10ml)</option>
+          <option value="price-asc">Menor precio (10ml)</option>
+          <option value="sales-desc">Mas vendidos</option>
+          <option value="ml-desc">Mayor tamano botella</option>
+          <option value="ml-asc">Menor tamano botella</option>
+        </select>
+      </div>
+      <button class="btn-secondary" onclick="resetCatalogFilters()">Limpiar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Fragancia</th><th>Casa</th><th>Categoria</th><th>ml botella</th>
+          <th>Stock actual</th><th>P2ml</th><th>P5ml</th><th>P10ml</th><th>Margen</th><th>Ventas (ml)</th>
+        </tr></thead>
+        <tbody id="catalogo-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div class="modal-overlay hidden" id="cust-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-cust-name">Cliente</div>
+      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-cust-body"></div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════
 // CONFIG
@@ -2336,148 +2480,5 @@ document.getElementById('tab-inventory').style.display='grid';
 
 setSyncState('', 'Inicia sesión para sincronizar');
 document.getElementById('overlay').classList.remove('hidden');
-</script>
-
-<!-- CUSTOMER MODAL -->
-<div class="modal-overlay hidden" id="cust-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-cust-name">Cliente</div>
-      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">✕</button>
-    </div>
-    <div class="modal-body" id="modal-cust-body"></div>
-  </div>
-</div>
-
-<!-- TAB: LAYERS -->
-<div id="tab-layers" style="display:none">
-  <div style="padding:24px 32px;max-width:900px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div>
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Layers Armonicos</div>
-        <div style="font-family:'Raleway',sans-serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:3px">Combinaciones curadas - el primer servicio de Layering en Mexico</div>
-      </div>
-      <button class="btn-primary" onclick="showCreateLayer()">+ Crear Layer</button>
-    </div>
-    <div id="layer-form-wrap" style="display:none;margin-bottom:20px">
-      <div class="form-card">
-        <div class="form-divider">Nueva combinacion</div>
-        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
-          <div class="fg"><label>Nombre</label><input class="finput" id="ly-name" placeholder="ej. Desert Sunrise"></div>
-          <div class="fg"><label>Precio Bundle (MXN)</label><input class="finput" type="number" id="ly-price" placeholder="0"></div>
-        </div>
-        <div class="fg" style="margin-bottom:10px"><label>Descripcion</label><input class="finput" id="ly-desc" placeholder="Por que funcionan juntos..."></div>
-        <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
-          <div class="fg"><label>Ocasion</label><input class="finput" id="ly-occasion" placeholder="ej. Noche de verano..."></div>
-          <div class="fg"><label>Clima</label><input class="finput" id="ly-climate" placeholder="ej. Calido y humedo..."></div>
-        </div>
-        <div class="form-divider">Fragancias</div>
-        <div class="form-row" style="grid-template-columns:2fr 1fr;margin-bottom:8px">
-          <div class="fg"><label>Fragancia 1</label><select class="fselect" id="ly-frag1"><option value="">Seleccionar...</option></select></div>
-          <div class="fg"><label>Tamano</label><select class="fselect" id="ly-size1"><option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option></select></div>
-        </div>
-        <div class="form-row" style="grid-template-columns:2fr 1fr;margin-bottom:12px">
-          <div class="fg"><label>Fragancia 2</label><select class="fselect" id="ly-frag2"><option value="">Seleccionar...</option></select></div>
-          <div class="fg"><label>Tamano</label><select class="fselect" id="ly-size2"><option value="2">2ml</option><option value="5">5ml</option><option value="10">10ml</option></select></div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-primary" onclick="saveLayer()">Guardar Layer</button>
-          <button class="btn-secondary" onclick="document.getElementById('layer-form-wrap').style.display='none'">Cancelar</button>
-        </div>
-      </div>
-    </div>
-    <div id="layers-list"></div>
-  </div>
-</div>
-
-<!-- LAYER ORDER MODAL -->
-<div class="modal-overlay hidden" id="layer-order-modal">
-  <div class="modal-box" style="max-width:520px">
-    <div class="modal-header">
-      <div class="modal-title" id="layer-modal-title">Vender Layer</div>
-      <button class="modal-close" onclick="document.getElementById('layer-order-modal').classList.add('hidden')">&#x2715;</button>
-    </div>
-    <div class="modal-body">
-      <div id="layer-modal-summary" style="margin-bottom:16px"></div>
-      <div class="form-divider">Datos de la orden</div>
-      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
-        <div class="fg"><label>Orden #</label><input class="finput" id="lom-ordernum" placeholder="MP-001"></div>
-        <div class="fg"><label>Fecha</label><input class="finput" type="date" id="lom-date"></div>
-      </div>
-      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:8px">
-        <div class="fg"><label>Nombre cliente</label><input class="finput" id="lom-name" placeholder="Nombre completo"></div>
-        <div class="fg"><label>Email</label><input class="finput" type="email" id="lom-email" placeholder="cliente@email.com"></div>
-      </div>
-      <div class="form-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
-        <div class="fg"><label>Telefono</label><input class="finput" id="lom-phone" placeholder="+52 33..."></div>
-        <div class="fg"><label>Envio $</label><input class="finput" type="number" id="lom-shipping" placeholder="0"></div>
-      </div>
-      <div class="fg" style="margin-bottom:12px"><label>Direccion</label><input class="finput" id="lom-address" placeholder="Calle, Colonia, Ciudad, CP"></div>
-      <button class="btn-primary" id="lom-btn" onclick="registerLayerOrder()">Registrar Orden de Layer</button>
-    </div>
-  </div>
-</div>
-
-<!-- TAB: CATALOGO -->
-<div id="tab-catalogo" style="display:none">
-  <div style="padding:24px 32px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)">Catalogo Completo</div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--muted)" id="catalogo-count"></div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;background:var(--white);border:1px solid var(--border-mid);border-radius:10px;padding:14px">
-      <div style="flex:1;min-width:180px">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Buscar</div>
-        <div class="search-wrap"><span class="search-icon">&#x2315;</span><input class="search-input" id="cat-search" type="text" placeholder="Nombre, codigo, casa..."></div>
-      </div>
-      <div style="min-width:150px">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Casa</div>
-        <select class="fselect" id="cat-casa" style="width:100%"><option value="">Todas las casas</option></select>
-      </div>
-      <div style="min-width:150px">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Categoria</div>
-        <select class="fselect" id="cat-cat" style="width:100%"><option value="">Todas</option></select>
-      </div>
-      <div style="min-width:180px">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--slate);margin-bottom:5px">Ordenar por</div>
-        <select class="fselect" id="cat-sort" style="width:100%">
-          <option value="alpha-asc">Nombre A-Z</option>
-          <option value="alpha-desc">Nombre Z-A</option>
-          <option value="casa-asc">Casa A-Z</option>
-          <option value="stock-desc">Mayor stock</option>
-          <option value="stock-asc">Menor stock</option>
-          <option value="margin-desc">Mayor margen</option>
-          <option value="margin-asc">Menor margen</option>
-          <option value="price-desc">Mayor precio (10ml)</option>
-          <option value="price-asc">Menor precio (10ml)</option>
-          <option value="sales-desc">Mas vendidos</option>
-          <option value="ml-desc">Mayor tamano botella</option>
-          <option value="ml-asc">Menor tamano botella</option>
-        </select>
-      </div>
-      <button class="btn-secondary" onclick="resetCatalogFilters()">Limpiar</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Fragancia</th><th>Casa</th><th>Categoria</th><th>ml botella</th>
-          <th>Stock actual</th><th>P2ml</th><th>P5ml</th><th>P10ml</th><th>Margen</th><th>Ventas (ml)</th>
-        </tr></thead>
-        <tbody id="catalogo-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- CUSTOMER MODAL -->
-<div class="modal-overlay hidden" id="cust-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-cust-name">Cliente</div>
-      <button class="modal-close" onclick="document.getElementById('cust-modal').classList.add('hidden')">&#x2715;</button>
-    </div>
-    <div class="modal-body" id="modal-cust-body"></div>
-  </div>
-</div>
-</body>
+</script></body>
 </html>
