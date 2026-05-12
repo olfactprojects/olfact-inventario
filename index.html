@@ -1146,6 +1146,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
   </div>
 </div>
 
+
 <script>
 // ═══════════════════════════════════════
 // CONFIG
@@ -3218,6 +3219,7 @@ function updateSimulator() {
   simState.maxPrice = maxPrice;
   simState.costoMl = costoMl;
 
+  buildChartPaths();
   drawSimChart();
   updateSimKPIs();
 }
@@ -3304,226 +3306,245 @@ function updateSimKPIs() {
 
 function drawSimChart() {
   const canvas = document.getElementById('sim-chart');
-  if(!canvas) return;
+  if(!canvas || !simState.chartPoints.length) return;
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth || 600;
+  const rect = canvas.getBoundingClientRect();
+  const W = rect.width || 600;
   const H = 320;
-  canvas.width = W * window.devicePixelRatio;
-  canvas.height = H * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  // Only resize if dimensions actually changed
+  const dpr = Math.min(window.devicePixelRatio||1, 2); // cap at 2x, not 3x
+  if(canvas.width !== Math.round(W*dpr) || canvas.height !== H*dpr) {
+    canvas.width = Math.round(W*dpr);
+    canvas.height = H*dpr;
+    ctx.scale(dpr, dpr);
+  }
 
   const pts = simState.chartPoints;
-  if(!pts.length) { ctx.clearRect(0,0,W,H); return; }
-
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const bgColor = isDark ? '#213C4E' : '#FFFFFF';
-  const gridColor = isDark ? 'rgba(255,245,217,0.06)' : 'rgba(33,60,78,0.06)';
-  const textColor = isDark ? '#9BB0B8' : '#7B949C';
-  const zeroColor = isDark ? 'rgba(255,245,217,0.3)' : 'rgba(33,60,78,0.2)';
-
   const PAD = {top:20, right:20, bottom:40, left:64};
   const CW = W - PAD.left - PAD.right;
   const CH = H - PAD.top - PAD.bottom;
 
-  // Value ranges
-  const utils = pts.map(p=>p.util);
-  const minUtil = Math.min(...utils, 0);
-  const maxUtil = Math.max(...utils, 0);
-  const utilRange = maxUtil - minUtil || 1;
-  const minP = pts[0].price, maxP = pts[pts.length-1].price;
+  // Use cached min/max from simState (pre-calculated in updateSimulator)
+  const minUtil = simState._minUtil;
+  const maxUtil = simState._maxUtil;
+  const utilRange = simState._utilRange;
+  const minP = simState.minPrice;
+  const maxP = simState.maxPrice;
   const priceRange = maxP - minP || 1;
+  const zeroY = PAD.top + (1 - (0 - minUtil) / utilRange) * CH;
 
   const toX = price => PAD.left + ((price - minP) / priceRange) * CW;
   const toY = util => PAD.top + (1 - (util - minUtil) / utilRange) * CH;
-  const zeroY = toY(0);
 
-  // Background
-  ctx.fillStyle = bgColor;
+  const gridColor = isDark ? 'rgba(255,245,217,0.06)' : 'rgba(33,60,78,0.06)';
+  const textColor = isDark ? '#9BB0B8' : '#7B949C';
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = isDark ? '#213C4E' : '#FFFFFF';
   ctx.fillRect(0,0,W,H);
 
-  // Grid lines
+  // Grid (5 lines only)
   ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = textColor;
   for(let i=0; i<=5; i++) {
     const y = PAD.top + (CH/5)*i;
     ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+CW,y); ctx.stroke();
     const val = maxUtil - (utilRange/5)*i;
-    ctx.fillStyle = textColor;
-    ctx.font = '10px "Space Grotesk", sans-serif';
-    ctx.textAlign = 'right';
     ctx.fillText((val>=0?'$':'-$') + Math.abs(Math.round(val)).toLocaleString('es-MX'), PAD.left-6, y+4);
   }
-  // X grid / labels
+  // X labels (4 only)
+  ctx.textAlign = 'center';
   for(let i=0; i<=4; i++) {
     const price = minP + (priceRange/4)*i;
     const x = toX(price);
     ctx.strokeStyle = gridColor;
     ctx.beginPath(); ctx.moveTo(x,PAD.top); ctx.lineTo(x,PAD.top+CH); ctx.stroke();
     ctx.fillStyle = textColor;
-    ctx.font = '10px "Space Grotesk", sans-serif';
-    ctx.textAlign = 'center';
     ctx.fillText('$'+Math.round(price).toLocaleString('es-MX'), x, H-PAD.bottom+16);
   }
 
   // Zero line
   if(zeroY >= PAD.top && zeroY <= PAD.top+CH) {
-    ctx.strokeStyle = zeroColor;
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = isDark ? 'rgba(255,245,217,0.25)' : 'rgba(33,60,78,0.18)';
+    ctx.lineWidth = 1;
     ctx.setLineDash([4,4]);
     ctx.beginPath(); ctx.moveTo(PAD.left,zeroY); ctx.lineTo(PAD.left+CW,zeroY); ctx.stroke();
     ctx.setLineDash([]);
   }
 
-  // Competitor price vertical line
+  // Competitor line (simple, no fill)
   if(simState.compPrice > 0 && simState.compPrice >= minP && simState.compPrice <= maxP) {
     const cx = toX(simState.compPrice);
-    ctx.strokeStyle = 'rgba(26,95,168,0.6)';
+    ctx.strokeStyle = 'rgba(26,95,168,0.5)';
     ctx.lineWidth = 1.5;
-    ctx.setLineDash([6,3]);
+    ctx.setLineDash([5,3]);
     ctx.beginPath(); ctx.moveTo(cx,PAD.top); ctx.lineTo(cx,PAD.top+CH); ctx.stroke();
     ctx.setLineDash([]);
-    // Competitor zone shading
-    ctx.fillStyle = 'rgba(26,95,168,0.06)';
-    ctx.fillRect(cx-30, PAD.top, 60, CH);
-    // Label
-    ctx.fillStyle = 'rgba(26,95,168,0.8)';
-    ctx.font = 'bold 9px "Space Grotesk", sans-serif';
+    ctx.fillStyle = 'rgba(26,95,168,0.7)';
+    ctx.font = 'bold 9px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('COMP', cx, PAD.top+12);
+    ctx.fillText('COMP', cx, PAD.top+11);
   }
 
-  // Gradient fill (profit green / loss red)
-  for(let i=0; i<pts.length-1; i++) {
-    const x0=toX(pts[i].price), x1=toX(pts[i+1].price);
-    const y0=toY(pts[i].util), y1=toY(pts[i+1].util);
-    const isProfit = pts[i].util >= 0;
-    const grad = ctx.createLinearGradient(x0,0,x0,H);
-    if(isProfit) {
-      grad.addColorStop(0, 'rgba(45,122,82,0.15)');
-      grad.addColorStop(1, 'rgba(45,122,82,0.01)');
-    } else {
-      grad.addColorStop(0, 'rgba(192,57,43,0.01)');
-      grad.addColorStop(1, 'rgba(192,57,43,0.15)');
-    }
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(x0,zeroY); ctx.lineTo(x0,y0); ctx.lineTo(x1,y1); ctx.lineTo(x1,zeroY);
-    ctx.closePath(); ctx.fill();
+  // Use pre-built path from simState cache
+  if(simState._profitPath && simState._lossPath) {
+    // Profit fill
+    const gProfit = ctx.createLinearGradient(0, PAD.top, 0, PAD.top+CH);
+    gProfit.addColorStop(0, 'rgba(45,122,82,0.18)');
+    gProfit.addColorStop(1, 'rgba(45,122,82,0.01)');
+    ctx.fillStyle = gProfit;
+    ctx.fill(simState._profitPath);
+    // Loss fill
+    const gLoss = ctx.createLinearGradient(0, PAD.top, 0, PAD.top+CH);
+    gLoss.addColorStop(0, 'rgba(192,57,43,0.01)');
+    gLoss.addColorStop(1, 'rgba(192,57,43,0.14)');
+    ctx.fillStyle = gLoss;
+    ctx.fill(simState._lossPath);
+    // Lines
+    ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#2d7a52'; ctx.stroke(simState._profitLinePath);
+    ctx.strokeStyle = '#c0392b'; ctx.stroke(simState._lossLinePath);
   }
 
-  // Main curve
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  // Draw profit segments green, loss segments red
-  let i=0;
-  while(i<pts.length-1) {
-    const startProfit = pts[i].util >= 0;
-    ctx.beginPath();
-    ctx.strokeStyle = startProfit ? '#2d7a52' : '#c0392b';
-    ctx.moveTo(toX(pts[i].price), toY(pts[i].util));
-    while(i<pts.length-1 && (pts[i+1].util >= 0) === startProfit) {
-      i++;
-      ctx.lineTo(toX(pts[i].price), toY(pts[i].util));
-    }
-    // Interpolate zero crossing
-    if(i<pts.length-1) {
-      const p0=pts[i], p1=pts[i+1];
-      const t = p0.util / (p0.util - p1.util);
-      const xCross = toX(p0.price + t*(p1.price-p0.price));
-      ctx.lineTo(xCross, toY(0));
-    }
-    ctx.stroke();
-  }
-
-  // Current price indicator (vertical + dot)
+  // Current price dot (only animated part)
   const simPrice = simState.currentPrice;
   if(simPrice >= minP && simPrice <= maxP) {
     const sx = toX(simPrice);
-    const costoMl = simState.costoMl || 0;
-    const util = calcUtil10(simPrice, costoMl);
+    const util = calcUtil10(simPrice, simState.costoMl||0);
     const sy = toY(util);
-    // Vertical guide line
-    ctx.strokeStyle = 'rgba(33,60,78,0.4)';
+    const dotColor = util >= 0 ? '#2d7a52' : '#c0392b';
+    // Vertical guide
+    ctx.strokeStyle = isDark ? 'rgba(255,245,217,0.25)' : 'rgba(33,60,78,0.3)';
     ctx.lineWidth = 1;
     ctx.setLineDash([3,3]);
     ctx.beginPath(); ctx.moveTo(sx,PAD.top); ctx.lineTo(sx,PAD.top+CH); ctx.stroke();
     ctx.setLineDash([]);
-    // Glow dot
-    const dotColor = util >= 0 ? '#2d7a52' : '#c0392b';
-    ctx.shadowColor = dotColor;
-    ctx.shadowBlur = 12;
+    // Dot (no shadow — shadows are expensive)
     ctx.fillStyle = dotColor;
-    ctx.beginPath(); ctx.arc(sx, sy, 7, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(sx, sy, 8, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI*2); ctx.fill();
-    // Price label above dot
+    ctx.beginPath(); ctx.arc(sx, sy, 3.5, 0, Math.PI*2); ctx.fill();
+    // Label
     ctx.fillStyle = isDark ? '#FFF5D9' : '#213C4E';
-    ctx.font = 'bold 11px "Space Grotesk", sans-serif';
+    ctx.font = 'bold 11px monospace';
     ctx.textAlign = 'center';
-    const labelY = Math.max(PAD.top+18, sy-16);
-    ctx.fillText('$'+Math.round(simPrice).toLocaleString('es-MX'), sx, labelY);
+    ctx.fillText('$'+Math.round(simPrice).toLocaleString('es-MX'), sx, Math.max(PAD.top+17, sy-14));
   }
-
-  // Attach mouse events
-  canvas._simBound = true;
 }
 
-// Mouse interaction on chart
+// Pre-build Path2D objects once when data changes (not on every frame)
+function buildChartPaths() {
+  const pts = simState.chartPoints;
+  if(!pts.length) return;
+  const canvas = document.getElementById('sim-chart');
+  if(!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const W = rect.width || 600;
+  const H = 320;
+  const PAD = {top:20, right:20, bottom:40, left:64};
+  const CW = W - PAD.left - PAD.right;
+  const CH = H - PAD.top - PAD.bottom;
+
+  const utils = pts.map(p=>p.util);
+  simState._minUtil = Math.min(...utils, 0);
+  simState._maxUtil = Math.max(...utils, 0);
+  simState._utilRange = simState._maxUtil - simState._minUtil || 1;
+  const minP = simState.minPrice, maxP = simState.maxPrice;
+  const priceRange = maxP - minP || 1;
+  const zeroY = PAD.top + (1 - (0 - simState._minUtil) / simState._utilRange) * CH;
+
+  const toX = price => PAD.left + ((price - minP) / priceRange) * CW;
+  const toY = util => PAD.top + (1 - (util - simState._minUtil) / simState._utilRange) * CH;
+
+  // Build 4 Path2D objects: profit fill, loss fill, profit line, loss line
+  const profitFill = new Path2D();
+  const lossFill = new Path2D();
+  const profitLine = new Path2D();
+  const lossLine = new Path2D();
+  let profitStarted = false, lossStarted = false;
+  let profitLineStarted = false, lossLineStarted = false;
+
+  for(let i=0; i<pts.length; i++) {
+    const x = toX(pts[i].price);
+    const y = toY(pts[i].util);
+    const isProfit = pts[i].util >= 0;
+    if(isProfit) {
+      if(!profitStarted) { profitFill.moveTo(x, zeroY); profitStarted = true; }
+      profitFill.lineTo(x, y);
+      if(!profitLineStarted) { profitLine.moveTo(x, y); profitLineStarted = true; }
+      else profitLine.lineTo(x, y);
+    } else {
+      if(!lossStarted) { lossFill.moveTo(x, zeroY); lossStarted = true; }
+      lossFill.lineTo(x, y);
+      if(!lossLineStarted) { lossLine.moveTo(x, y); lossLineStarted = true; }
+      else lossLine.lineTo(x, y);
+    }
+  }
+  if(profitStarted) { profitFill.lineTo(toX(pts[pts.length-1].price), zeroY); profitFill.closePath(); }
+  if(lossStarted) { lossFill.lineTo(toX(pts[pts.length-1].price), zeroY); lossFill.closePath(); }
+
+  simState._profitPath = profitFill;
+  simState._lossPath = lossFill;
+  simState._profitLinePath = profitLine;
+  simState._lossLinePath = lossLine;
+}
+
 function initSimChartEvents() {
   const canvas = document.getElementById('sim-chart');
   if(!canvas || canvas._eventsSet) return;
   canvas._eventsSet = true;
   const tooltip = document.getElementById('sim-tooltip');
+  let rafPending = false;
+  let lastMx = -1;
 
   canvas.addEventListener('mousemove', e=>{
-    if(!simState.chartPoints.length) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const W = rect.width;
-    const PAD_LEFT = 64, PAD_RIGHT = 20;
-    const CW = W - PAD_LEFT - PAD_RIGHT;
-    const ratio = (mx - PAD_LEFT) / CW;
-    const price = simState.minPrice + ratio * (simState.maxPrice - simState.minPrice);
-    const clampedPrice = Math.max(simState.minPrice, Math.min(simState.maxPrice, Math.round(price/5)*5));
+    const mx = e.clientX - canvas.getBoundingClientRect().left;
+    // Throttle: skip if moved less than 3px
+    if(Math.abs(mx - lastMx) < 3) return;
+    lastMx = mx;
+    if(rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(()=>{
+      rafPending = false;
+      if(!simState.chartPoints.length) return;
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width;
+      const PAD_LEFT = 64, PAD_RIGHT = 20;
+      const CW = W - PAD_LEFT - PAD_RIGHT;
+      const ratio = Math.max(0, Math.min(1, (lastMx - PAD_LEFT) / CW));
+      const price = Math.round((simState.minPrice + ratio * (simState.maxPrice - simState.minPrice)) / 5) * 5;
+      simState.currentPrice = price;
+      document.getElementById('sim-slider').value = price;
+      drawSimChart();
+      updateSimKPIs();
+      // Tooltip
+      const costoMl = simState.costoMl||0;
+      const util = calcUtil10(price, costoMl);
+      const marginPct = costoMl > 0 ? ((util/(costoMl*10))*100).toFixed(1) : '—';
+      tooltip.style.display = 'block';
+      tooltip.style.left = Math.min(lastMx+12, W-150)+'px';
+      tooltip.style.top = Math.max(8, e.clientY - rect.top - 40)+'px';
+      document.getElementById('sim-tt-price').textContent = '$'+Math.round(price).toLocaleString('es-MX');
+      document.getElementById('sim-tt-util').textContent = 'Utilidad: '+fmt(Math.round(util));
+      document.getElementById('sim-tt-margin').textContent = 'Margen: '+marginPct+'%';
+    });
+  }, {passive:true});
 
-    // Update slider + KPIs
-    document.getElementById('sim-slider').value = clampedPrice;
-    simState.currentPrice = clampedPrice;
-    drawSimChart();
-    updateSimKPIs();
-
-    // Tooltip
-    const costoMl = simState.costoMl || 0;
-    const util = calcUtil10(clampedPrice, costoMl);
-    const marginPct = costoMl > 0 ? ((util/(costoMl*10))*100).toFixed(1) : '—';
-    tooltip.style.display = 'block';
-    tooltip.style.left = Math.min(mx + 12, W - 160) + 'px';
-    tooltip.style.top = Math.max(8, e.clientY - rect.top - 40) + 'px';
-    document.getElementById('sim-tt-price').textContent = '$' + Math.round(clampedPrice).toLocaleString('es-MX');
-    document.getElementById('sim-tt-util').textContent = 'Utilidad: ' + fmt(Math.round(util));
-    document.getElementById('sim-tt-margin').textContent = 'Margen: ' + marginPct + '%';
-  });
-
-  canvas.addEventListener('mouseleave', ()=>{
-    if(tooltip) tooltip.style.display = 'none';
-  });
-
+  canvas.addEventListener('mouseleave', ()=>{ tooltip.style.display='none'; }, {passive:true});
   canvas.addEventListener('click', e=>{
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
-    const W = rect.width;
-    const PAD_LEFT = 64, PAD_RIGHT = 20;
-    const CW = W - PAD_LEFT - PAD_RIGHT;
-    const ratio = (mx - PAD_LEFT) / CW;
-    const price = simState.minPrice + ratio * (simState.maxPrice - simState.minPrice);
-    simState.currentPrice = Math.max(simState.minPrice, Math.min(simState.maxPrice, Math.round(price/5)*5));
+    const ratio = Math.max(0, Math.min(1, (mx-64)/(rect.width-84)));
+    simState.currentPrice = Math.round((simState.minPrice + ratio*(simState.maxPrice-simState.minPrice))/5)*5;
     document.getElementById('sim-slider').value = simState.currentPrice;
-    drawSimChart();
-    updateSimKPIs();
+    drawSimChart(); updateSimKPIs();
   });
 }
+
 
 function applySimulatorPrice() {
   const id = simState.fragId;
