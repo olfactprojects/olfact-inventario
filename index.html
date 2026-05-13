@@ -575,7 +575,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     </div>
     <div class="sb-section">
       <div class="sb-label">Categoría</div>
-      <div class="pills" id="cat-pills"></div>
+      <div class="pills" id="cat-pills-old"></div>
     </div>
     <div class="sb-section">
       <div class="sb-label">Stock</div>
@@ -587,9 +587,9 @@ tr:hover td{background:rgba(33,60,78,0.02)}
         <button class="pill" data-stock="out">Sin stock</button>
       </div>
     </div>
-    <div class="product-list" id="product-list"></div>
+    <div class="product-list" id="product-list-old"></div>
   </div>
-  <div class="main" id="main-detail">
+  <div class="main" id="main-detail-old">
     <div class="empty-state">
       <svg width="56" height="46" viewBox="0 0 26 20" fill="none"><path d="M1 15 C3.5 15 5 7 7.5 7 C10 7 10 13 12.5 10 C15 7 15 3 17.5 3 C20 3 20 11 22.5 11 C24 11 24.5 8 25.5 8" stroke="#7B949C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <p>Selecciona una fragancia para gestionar su inventario</p>
@@ -624,18 +624,18 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     <div class="orders-header">
       <div class="orders-title">Historial de Órdenes</div>
       <div class="ostats">
-        <div class="ostat"><div class="ostat-val" id="ot-count">0</div><div class="ostat-lbl">Órdenes</div></div>
-        <div class="ostat"><div class="ostat-val" id="ot-rev">$0</div><div class="ostat-lbl">Ingresos</div></div>
-        <div class="ostat"><div class="ostat-val" id="ot-ml">0ml</div><div class="ostat-lbl">ml vendidos</div></div>
-        <div class="ostat"><div class="ostat-val" id="ot-ship">$0</div><div class="ostat-lbl">Envíos</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-count-old">0</div><div class="ostat-lbl">Órdenes</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-rev-old">$0</div><div class="ostat-lbl">Ingresos</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-ml-old">0ml</div><div class="ostat-lbl">ml vendidos</div></div>
+        <div class="ostat"><div class="ostat-val" id="ot-ship-old">$0</div><div class="ostat-lbl">Envíos</div></div>
       </div>
     </div>
     <div class="filter-bar">
       <span class="filter-lbl">Fecha:</span>
-      <input type="date" class="date-input" id="ot-from">
+      <input type="date" class="date-input" id="ot-from-old">
       <span class="filter-lbl">—</span>
-      <input type="date" class="date-input" id="ot-to">
-      <button class="pill active" id="ot-clear">Limpiar</button>
+      <input type="date" class="date-input" id="ot-to-old">
+      <button class="pill active" id="ot-clear-old">Limpiar</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -643,7 +643,7 @@ tr:hover td{background:rgba(33,60,78,0.02)}
           <th>Orden #</th><th>Fecha</th><th>Cliente</th><th>Fragancia</th>
           <th>Ingreso</th><th>Estado</th>
         </tr></thead>
-        <tbody id="ot-tbody"></tbody>
+        <tbody id="ot-tbody-old"></tbody>
       </table>
     </div>
   </div>
@@ -688,9 +688,9 @@ tr:hover td{background:rgba(33,60,78,0.02)}
     </div>
     <div class="search-wrap" style="margin-bottom:14px;max-width:300px">
       <span class="search-icon">⌕</span>
-      <input class="search-input" id="cust-search" type="text" placeholder="Buscar cliente...">
+      <input class="search-input" id="cust-search-old" type="text" placeholder="Buscar cliente...">
     </div>
-    <div class="cust-grid" id="cust-grid"></div>
+    <div class="cust-grid" id="cust-grid-old"></div>
   </div>
 </div>
 
@@ -704,12 +704,12 @@ tr:hover td{background:rgba(33,60,78,0.02)}
       <div class="settings-title">Costos de Materiales</div>
       <div class="settings-desc">Costo de frasquito + atomizador por tamaño. Afecta el cálculo de utilidad neta en cada decant.</div>
       <div class="cost-grid">
-        <div class="fg"><label>Costo frasquito 2ml (MXN)</label><input class="finput" id="cost-2ml" type="number" min="0" step="0.5" placeholder="0"></div>
-        <div class="fg"><label>Costo frasquito 5ml (MXN)</label><input class="finput" id="cost-5ml" type="number" min="0" step="0.5" placeholder="0"></div>
-        <div class="fg"><label>Costo frasquito 10ml (MXN)</label><input class="finput" id="cost-10ml" type="number" min="0" step="0.5" placeholder="0"></div>
+        <div class="fg"><label>Costo frasquito 2ml (MXN)</label><input class="finput" id="cost-2ml-old" type="number" min="0" step="0.5" placeholder="0"></div>
+        <div class="fg"><label>Costo frasquito 5ml (MXN)</label><input class="finput" id="cost-5ml-old" type="number" min="0" step="0.5" placeholder="0"></div>
+        <div class="fg"><label>Costo frasquito 10ml (MXN)</label><input class="finput" id="cost-10ml-old" type="number" min="0" step="0.5" placeholder="0"></div>
       </div>
-      <div class="fg" style="max-width:300px;margin-bottom:12px"><label>Costo empaque promedio (MXN)</label><input class="finput" id="cost-pack" type="number" min="0" step="0.5" placeholder="0"></div>
-      <button class="btn-primary" id="btn-save-costs">Guardar costos</button>
+      <div class="fg" style="max-width:300px;margin-bottom:12px"><label>Costo empaque promedio (MXN)</label><input class="finput" id="cost-pack-old" type="number" min="0" step="0.5" placeholder="0"></div>
+      <button class="btn-primary" id="btn-save-costs-old">Guardar costos</button>
     </div>
 
     <!-- MARGINS -->
@@ -718,10 +718,10 @@ tr:hover td{background:rgba(33,60,78,0.02)}
       <div class="settings-desc">Ajusta el margen de cada fragancia. Los precios se recalculan automáticamente.</div>
       <div class="search-wrap margin-search" style="max-width:300px">
         <span class="search-icon">⌕</span>
-        <input class="search-input" id="margin-search" type="text" placeholder="Buscar fragancia...">
+        <input class="search-input" id="margin-search-old" type="text" placeholder="Buscar fragancia...">
       </div>
-      <div id="margin-list" style="max-height:400px;overflow-y:auto"></div>
-      <button class="btn-primary" id="btn-save-margins" style="margin-top:12px">Guardar márgenes</button>
+      <div id="margin-list-old" style="max-height:400px;overflow-y:auto"></div>
+      <button class="btn-primary" id="btn-save-margins-old" style="margin-top:12px">Guardar márgenes</button>
     </div>
 
     <!-- THRESHOLDS -->
@@ -729,10 +729,10 @@ tr:hover td{background:rgba(33,60,78,0.02)}
       <div class="settings-title">Umbrales de Stock</div>
       <div class="settings-desc">Porcentaje mínimo para fragancias ≥100ml. Valor fijo en ml para fragancias &lt;100ml.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="fg"><label>Umbral crítico (% para ≥100ml)</label><input class="finput" id="thresh-pct" type="number" min="1" max="50" value="25"></div>
-        <div class="fg"><label>Umbral crítico (ml para &lt;100ml)</label><input class="finput" id="thresh-ml" type="number" min="1" max="50" value="20"></div>
+        <div class="fg"><label>Umbral crítico (% para ≥100ml)</label><input class="finput" id="thresh-pct-old" type="number" min="1" max="50" value="25"></div>
+        <div class="fg"><label>Umbral crítico (ml para &lt;100ml)</label><input class="finput" id="thresh-ml-old" type="number" min="1" max="50" value="20"></div>
       </div>
-      <button class="btn-primary" id="btn-save-thresh" style="margin-top:12px">Guardar umbrales</button>
+      <button class="btn-primary" id="btn-save-thresh-old" style="margin-top:12px">Guardar umbrales</button>
     </div>
   </div>
 </div>
@@ -2503,7 +2503,7 @@ document.querySelectorAll('[data-fulfill-filter]').forEach(btn=>btn.addEventList
 }));
 document.getElementById('ot-from').addEventListener('change',()=>{if(activeTab==='orders')renderOrdersTab()});
 document.getElementById('ot-to').addEventListener('change',()=>{if(activeTab==='orders')renderOrdersTab()});
-document.getElementById('ot-clear').addEventListener('click',()=>{document.getElementById('ot-from').value='';document.getElementById('ot-to').value='';if(activeTab==='orders')renderOrdersTab();});
+// ot-clear listener moved to boot
 document.getElementById('cust-search').addEventListener('input',()=>{if(activeTab==='customers')renderCustomers()});
 document.querySelectorAll('[data-stock]').forEach(btn=>btn.addEventListener('click',()=>{
   document.querySelectorAll('[data-stock]').forEach(b=>b.classList.remove('active'));
@@ -2636,7 +2636,7 @@ function switchCatSub(sub, btn) {
     if(el) el.style.display='none';
   });
   const target=document.getElementById('catsub-'+sub);
-  if(target) target.style.display='block';
+  if(target) target.style.display = sub==='detalle'?'flex':'block';
   document.querySelectorAll('.sub-tabs-bar .sub-tab-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   if(sub==='tabla') renderCatalog();
@@ -2664,8 +2664,12 @@ function switchDashSub(sub, btn) {
 let activeTab='catalogo';
 function switchTab(tab) {
   activeTab=tab;
-  ['despacho','catalogo','ordenes','dashboard','clientes','ajustes'].forEach(t=>{
-    const el=document.getElementById('tab-'+t);
+  // Close cmd palette if open
+  const cmdOv=document.getElementById('cmd-overlay');
+  if(cmdOv&&!cmdOv.classList.contains('hidden')) cmdOv.classList.add('hidden');
+  ['tab-inventory','tab-fulfill','tab-orders','tab-customers','tab-settings',
+   'tab-despacho','tab-catalogo','tab-ordenes','tab-dashboard','tab-clientes','tab-ajustes'].forEach(id=>{
+    const el=document.getElementById(id);
     if(el) el.style.display='none';
   });
   const el=document.getElementById('tab-'+tab);
@@ -2913,7 +2917,7 @@ function renderCatalog() {
     const diffText=diff===null?'—':diff>0?`+${fmt(diff)}`:`-${fmt(Math.abs(diff))}`;
     const sc=p.ml_disponibles<(state.thresholds?.critMl||20)?'var(--red)':p.ml_disponibles<(p.ml_inicial*(state.thresholds?.critPct||25)/100)?'var(--amber)':'var(--green)';
     return `<tr style="border-bottom:1px solid var(--border)">
-      <td onclick="switchCatSub('detalle',document.querySelector('.sub-tab-btn'));state.selected=${p.id};renderList();renderDetail()" style="cursor:pointer">
+      <td onclick="state.selected=${p.id};switchCatSub('detalle',document.querySelector('.sub-tab-btn'));renderList();renderDetail()" style="cursor:pointer">
         <div style="font-weight:500;font-size:12px">${p.nombre}</div>
         <div style="font-size:10px;color:var(--muted);font-style:italic">${p.concentracion||''}</div>
       </td>
