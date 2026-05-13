@@ -3697,15 +3697,89 @@ function renderSimHistory(){
 
 // BOOT
 // ═══════════════════════════════════════
-// Restore dark mode preference
+
+// 1. Dark mode
 const savedTheme=localStorage.getItem('olfact_dark');
-if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('btn-darkmode').textContent='☀️';}
+if(savedTheme==='dark'){document.documentElement.setAttribute('data-theme','dark');const dm=document.getElementById('btn-darkmode');if(dm)dm.textContent='☀️';}
 
+// 2. Build data
 rebuildProducts(); renderAll();
-['tab-despacho','tab-ordenes','tab-dashboard','tab-clientes','tab-ajustes'].forEach(id=>document.getElementById(id).style.display='none');
-// catalogo shown via switchTab below
 
+// 3. Hide ALL tabs (old v6 tabs + new tabs)
+['tab-inventory','tab-fulfill','tab-orders','tab-dashboard','tab-customers','tab-settings',
+ 'tab-despacho','tab-ordenes','tab-dashboard','tab-clientes','tab-ajustes'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.style.display='none';
+});
+
+// 4. Show catálogo by default
+const catTab=document.getElementById('tab-catalogo');
+if(catTab) catTab.style.display='flex';
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='catalogo'));
+
+// 5. Wire catalog filter listeners
+['cat-search','cat-casa','cat-cat','cat-sort'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){el.addEventListener('input',renderCatalog);el.addEventListener('change',renderCatalog);}
+});
+
+// 6. Wire despacho search
+const despS=document.getElementById('desp-search');
+if(despS) despS.addEventListener('input',renderDespachoTab);
+
+// 7. Wire orders date filters
+const otFrom=document.getElementById('ot-from');
+const otTo=document.getElementById('ot-to');
+const otClear=document.getElementById('ot-clear');
+if(otFrom) otFrom.addEventListener('change',renderOrdersTab);
+if(otTo)   otTo.addEventListener('change',renderOrdersTab);
+if(otClear) otClear.addEventListener('click',()=>{
+  if(otFrom) otFrom.value=''; if(otTo) otTo.value=''; renderOrdersTab();
+});
+
+// 8. Wire catalog edit modal
+const cemBP=document.getElementById('cem-bottle-price');
+const cemMS=document.getElementById('cem-margin-slider');
+const cemMI=document.getElementById('cem-margin-input');
+const cemDisc=document.getElementById('cem-discount');
+if(cemBP)   cemBP.addEventListener('input',updateCatalogEditPreview);
+if(cemMS)   cemMS.addEventListener('input',()=>{if(cemMI)cemMI.value=cemMS.value;updateCatalogEditPreview();});
+if(cemMI)   cemMI.addEventListener('input',()=>{if(cemMS)cemMS.value=cemMI.value;updateCatalogEditPreview();});
+if(cemDisc) cemDisc.addEventListener('input',updateCatalogEditPreview);
+
+// 9. Close modals on backdrop click
+['catalog-edit-modal','insta-modal','bundle-modal','layer-order-modal','cust-modal'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('click',e=>{if(e.target===el)el.classList.add('hidden');});
+});
+
+// 10. Bundle discount
+const bunDisc=document.getElementById('bun-discount');
+if(bunDisc) bunDisc.addEventListener('input',updateBundleSummary);
+
+// 11. Simulator fragrance select
+const simFrag=document.getElementById('sim-fragrance');
+if(simFrag) simFrag.addEventListener('change',loadSimFragrance);
+
+// 12. Competitor prices from localStorage
+if(!state.competitorPrices) state.competitorPrices={};
+try{const sc=localStorage.getItem('olfact_comp');if(sc)Object.assign(state.competitorPrices,JSON.parse(sc));}catch(e){}
+
+// 13. Margin search
+const marginS=document.getElementById('margin-search');
+if(marginS) marginS.addEventListener('input',renderMarginList);
+
+// 14. Cust search
+const custS=document.getElementById('cust-search');
+if(custS) custS.addEventListener('input',()=>{if(activeTab==='clientes')renderCustomers();});
+
+// 15. Start sync
 setSyncState('', 'Inicia sesión para sincronizar');
 document.getElementById('overlay').classList.remove('hidden');
+
+// 16. QR URL fragment
+if(window.location.hash.startsWith('#frag-')){
+  const fragId=parseInt(window.location.hash.replace('#frag-',''));
+  if(fragId) setTimeout(()=>{state.selected=fragId;switchTab('catalogo');renderList();renderDetail();},800);
+}
 </script></body>
 </html>
